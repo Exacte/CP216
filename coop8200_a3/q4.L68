@@ -1,0 +1,43 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 1/29/2016 7:43:44 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :q4
+00000000                             3  * Written by :Mason Cooper
+00000000                             4  * Date       :28-01-2016
+00000000                             5  * Description:Infinitely takes input from swites and waits for push button input to displays it on the LED's
+00000000                             6  *-----------------------------------------------------------
+00000000  =00E00000                  7  SEG         EQU     $E00000
+00000000  =00E00010                  8  LEDS        EQU     $E00010
+00000000  =00E00012                  9  SW          EQU     $E00012
+00000000  =00E00014                 10  PB          EQU     $E00014
+00000000                            11      
+00000400                            12  START       ORG     $400
+00000400  103C 0000                 13              MOVE.B  #$00,D0
+00000404  13C0 00E00010             14              MOVE.B  D0,LEDS
+0000040A  13FC 006D 00E00000        15              MOVE.B  #$6D,SEG
+00000412                            16              
+00000412  1239 00E00012             17  LOOP        MOVE.B  SW,D1
+00000418  1001                      18              MOVE.B  D1,D0
+0000041A  1439 00E00014             19  DELAY       MOVE.B  PB,D2
+00000420  4602                      20              NOT.B   D2
+00000422  6FF6                      21              BLE     DELAY
+00000424  13C0 00E00010             22              MOVE.B  D0,LEDS
+0000042A  64E6                      23              BCC     LOOP
+0000042C                            24      END     START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+DELAY               41A
+LEDS                E00010
+LOOP                412
+PB                  E00014
+SEG                 E00000
+START               400
+SW                  E00012

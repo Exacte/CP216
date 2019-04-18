@@ -1,0 +1,122 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 1/29/2016 8:01:56 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :q5
+00000000                             3  * Written by :Mason Cooper
+00000000                             4  * Date       :296-01-2016
+00000000                             5  * Description:Car brake lights
+00000000                             6  *-----------------------------------------------------------
+00000000  =00E00010                  7  LEDS        EQU     $E00010
+00000000  =00E00012                  8  SW          EQU     $E00012
+00000000  =00E00014                  9  PB          EQU     $E00014
+00000000                            10      
+00000400                            11  START       ORG     $400
+00000400  103C 0000                 12              MOVE.B  #$00,D0
+00000404  13C0 00E00010             13              MOVE.B  D0,LEDS
+0000040A                            14              
+0000040A  1439 00E00012             15  LOOP        MOVE.B  SW,D2
+00000410  1239 00E00014             16              MOVE.B  PB,D1
+00000416  103C 0000                 17              MOVE.B  #$00,D0
+0000041A                            18              
+0000041A  1239 00E00014             19              MOVE.B  PB,D1
+00000420  4601                      20              NOT.B   D1
+00000422  B239 00000510             21              CMP.B   BON,D1
+00000428  6700 00AC                 22              BEQ     BRAKE
+0000042C                            23              
+0000042C  13C0 00E00010             24              MOVE.B  D0,LEDS
+00000432                            25              
+00000432  B439 0000050E             26              CMP.B   LEFT,D2
+00000438  6700 0050                 27              BEQ     LEFTT
+0000043C                            28              
+0000043C  B439 0000050F             29              CMP.B   RIGHT,D2
+00000442  6700 0004                 30              BEQ     RIGHTT
+00000446                            31              
+00000446  60C2                      32              BRA     LOOP
+00000448                            33              
+00000448  5800                      34  RIGHTT      ADD.B   #$4,D0
+0000044A  13C0 00E00010             35              MOVE.B  D0,LEDS
+00000450  4EB9 00000502             36              JSR     DELAY
+00000456  4E71                      37              NOP
+00000458  5400                      38              ADD.B   #$2,D0
+0000045A  13C0 00E00010             39              MOVE.B  D0,LEDS
+00000460  4EB9 00000502             40              JSR     DELAY
+00000466  4E71                      41              NOP
+00000468  5200                      42              ADD.B   #$1,D0
+0000046A  13C0 00E00010             43              MOVE.B  D0,LEDS
+00000470  4EB9 00000502             44              JSR     DELAY
+00000476  4E71                      45              NOP
+00000478  5F00                      46              SUB.B   #$7,D0
+0000047A  13C0 00E00010             47              MOVE.B  D0,LEDS
+00000480  4EB9 00000502             48              JSR     DELAY
+00000486  4E71                      49              NOP
+00000488  6080                      50              BRA     LOOP
+0000048A                            51  
+0000048A                            52  
+0000048A  0600 0020                 53  LEFTT       ADD.B   #$20,D0
+0000048E  13C0 00E00010             54              MOVE.B  D0,LEDS
+00000494  4EB9 00000502             55              JSR     DELAY
+0000049A  4E71                      56              NOP
+0000049C  0600 0040                 57              ADD.B   #$40,D0
+000004A0  13C0 00E00010             58              MOVE.B  D0,LEDS
+000004A6  4EB9 00000502             59              JSR     DELAY
+000004AC  4E71                      60              NOP
+000004AE  0600 0080                 61              ADD.B   #$80,D0
+000004B2  13C0 00E00010             62              MOVE.B  D0,LEDS
+000004B8  4EB9 00000502             63              JSR     DELAY
+000004BE  4E71                      64              NOP
+000004C0  0400 00E0                 65              SUB.B   #$E0,D0
+000004C4  13C0 00E00010             66              MOVE.B  D0,LEDS
+000004CA  4EB9 00000502             67              JSR     DELAY
+000004D0  4E71                      68              NOP
+000004D2  6000 FF36                 69              BRA     LOOP   
+000004D6                            70  
+000004D6  B439 0000050E             71  BRAKE       CMP.B   LEFT,D2
+000004DC  6700 0018                 72              BEQ     BRAKEL
+000004E0                            73              
+000004E0  B439 0000050F             74              CMP.B   RIGHT,D2
+000004E6  6700 0012                 75              BEQ     BRAKER
+000004EA                            76              
+000004EA  13FC 00E7 00E00010        77              MOVE.B  #$E7,LEDS
+000004F2  6000 FF16                 78              BRA     LOOP    
+000004F6                            79  
+000004F6  5E00                      80  BRAKEL      ADD.B   #$07,D0
+000004F8  6090                      81              BRA     LEFTT
+000004FA                            82  
+000004FA  0600 00E0                 83  BRAKER      ADD.B   #$E0,D0
+000004FE  6000 FF48                 84              BRA     RIGHTT
+00000502                            85              
+00000502  263C 000AAAA0             86  DELAY       MOVE.L  #$AAAA0,D3
+00000508  5383                      87  DELAYING    SUBI.L  #1,D3
+0000050A  66FC                      88              BNE     DELAYING
+0000050C  4E75                      89              RTS
+0000050E                            90  
+0000050E= 02                        91  LEFT        DC.B    $2
+0000050F= 01                        92  RIGHT       DC.B    $1
+00000510= 01                        93  BON         DC.B    $1
+00000511                            94  
+00000511                            95      END     START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+BON                 510
+BRAKE               4D6
+BRAKEL              4F6
+BRAKER              4FA
+DELAY               502
+DELAYING            508
+LEDS                E00010
+LEFT                50E
+LEFTT               48A
+LOOP                40A
+PB                  E00014
+RIGHT               50F
+RIGHTT              448
+START               400
+SW                  E00012

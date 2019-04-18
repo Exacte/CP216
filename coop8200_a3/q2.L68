@@ -1,0 +1,33 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 1/29/2016 3:42:30 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :q2
+00000000                             3  * Written by :Mason Cooper
+00000000                             4  * Date       :28-01-2016
+00000000                             5  * Description:Infinitely takes input from swites and displays it on the LED's
+00000000                             6  *-----------------------------------------------------------
+00000000  =00E00010                  7  LEDS        EQU     $E00010
+00000000  =00E00012                  8  SW          EQU     $E00012
+00000000                             9      
+00000400                            10  START       ORG     $400
+00000400  103C 00FF                 11              MOVE.B  #$FF,D0
+00000404                            12              
+00000404  1239 00E00012             13  LOOP        MOVE.B  SW,D1
+0000040A  1001                      14              MOVE.B  D1,D0
+0000040C  13C0 00E00010             15              MOVE.B  D0,LEDS
+00000412  64F0                      16              BCC     LOOP
+00000414                            17      END     START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+LEDS                E00010
+LOOP                404
+START               400
+SW                  E00012

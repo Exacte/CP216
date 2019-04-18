@@ -1,0 +1,53 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 1/22/2016 5:25:15 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :Q5
+00000000                             3  * Written by :Mason Cooper
+00000000                             4  * Date       :2016-01-22
+00000000                             5  * Description:Converts luarier ID from upper case to lower case
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000400                             8  START       ORG     $400
+00000400                             9  
+00000400  41F9 0000043C             10              LEA     ID,A0
+00000406  43F9 0000044A             11              LEA     S1,A1
+0000040C  1039 00000448             12              MOVE.B  TL,D0
+00000412  1239 0000044E             13              MOVE.B  HOLD,D1
+00000418  1218                      14              MOVE.B  (A0)+,D1
+0000041A  D200                      15              ADD.B   D0,D1
+0000041C  12C1                      16              MOVE.B  D1,(A1)+
+0000041E  1218                      17              MOVE.B  (A0)+,D1
+00000420  D200                      18              ADD.B   D0,D1
+00000422  12C1                      19              MOVE.B  D1,(A1)+
+00000424  1218                      20              MOVE.B  (A0)+,D1
+00000426  D200                      21              ADD.B   D0,D1
+00000428  12C1                      22              MOVE.B  D1,(A1)+
+0000042A  1218                      23              MOVE.B  (A0)+,D1
+0000042C  D200                      24              ADD.B   D0,D1
+0000042E  12C1                      25              MOVE.B  D1,(A1)+
+00000430  12D8                      26              MOVE.B  (A0)+,(A1)+
+00000432  12D8                      27              MOVE.B  (A0)+,(A1)+
+00000434  12D8                      28              MOVE.B  (A0)+,(A1)+
+00000436  12D8                      29              MOVE.B  (A0)+,(A1)+
+00000438  4E72 1000                 30              STOP    #$1000
+0000043C                            31      
+0000043C= 434F4F50 38323030 ...     32  ID          DC.L    'COOP8200',0
+00000448= 20                        33  TL          DC.B    32
+0000044A                            34  S1          DS.L    1
+0000044E                            35  HOLD        DS.B    1
+0000044F                            36              END     START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+HOLD                44E
+ID                  43C
+S1                  44A
+START               400
+TL                  448

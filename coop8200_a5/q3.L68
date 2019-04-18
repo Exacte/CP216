@@ -1,0 +1,163 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 2/12/2016 11:14:23 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00000400                             7      START:      ORG     $400
+00000400  43F9 00000470              8              LEA     INIT,A1
+00000406  4EB9 00000532              9              JSR     P_STR
+0000040C  41F9 0000048A             10              LEA     COUNT1,A0
+00000412  43F9 0000048B             11              LEA     WORDS1,A1
+00000418  45F9 000004A9             12              LEA     WORD_L1,A2
+0000041E  4EB9 00000554             13              JSR     GET_WORDS
+00000424                            14              
+00000424  43F9 00000470             15              LEA     INIT,A1
+0000042A  4EB9 00000532             16              JSR     P_STR
+00000430  41F9 000004B3             17              LEA     COUNT2,A0
+00000436  43F9 000004B4             18              LEA     WORDS2,A1
+0000043C  45F9 000004D2             19              LEA     WORD_L2,A2
+00000442  4EB9 00000554             20              JSR     GET_WORDS
+00000448                            21              
+00000448  43F9 00000470             22              LEA     INIT,A1
+0000044E  4EB9 00000532             23              JSR     P_STR
+00000454  41F9 000004DC             24              LEA     COUNT3,A0
+0000045A  43F9 000004DD             25              LEA     WORDS3,A1
+00000460  45F9 000004FB             26              LEA     WORD_L3,A2
+00000466  4EB9 00000554             27              JSR     GET_WORDS
+0000046C                            28              
+0000046C  FFFF FFFF                 29              SIMHALT
+00000470                            30  
+00000470= 45 6E 74 65 72 20 ...     31  INIT        DC.B    'Enter a series of words: ',0
+0000048A= 00                        32  COUNT1      DC.B    0
+0000048B                            33  WORDS1      DS.B    30
+000004A9                            34  WORD_L1     DS.B    10
+000004B3= 00                        35  COUNT2      DC.B    0
+000004B4                            36  WORDS2      DS.B    30
+000004D2                            37  WORD_L2     DS.B    10
+000004DC= 00                        38  COUNT3      DC.B    0
+000004DD                            39  WORDS3      DS.B    30
+000004FB                            40  WORD_L3     DS.B    10
+00000505                            41  *-----------------------------------------------------------
+00000505                            42  
+00000505                            43              INCLUDE 'io_util_q3.x68'
+00000506  48E7 8000                 44  P_PRMPT     MOVEM.L D0,-(SP)                Preserve D0
+0000050A  7012                      45              MOVEQ.L #18,D0                  Set up prompt and read number into D1.L
+0000050C  4E4F                      46              TRAP    #15
+0000050E  4CDF 0001                 47              MOVEM.L (SP)+,D0                Restore D0
+00000512  4E75                      48              RTS
+00000514                            49                          
+00000514  48E7 8040                 50  STR_FUNCT   MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00000518  7002                      51              MOVEQ.L #2,D0                   Set up to read string into A1 and length into D1.L
+0000051A  4E4F                      52              TRAP    #15
+0000051C  2449                      53              MOVE.L  A1,A2                     
+0000051E  4CDF 0201                 54              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+00000522  4E75                      55              RTS
+00000524                            56  
+00000524  48E7 8040                 57  P_NUM       MOVEM.L D0/A1,-(SP)             Preserve D0
+00000528  7011                      58              MOVEQ   #17,D0                  Set up to print D1.L without CR/LF
+0000052A  4E4F                      59              TRAP    #15                     Print the number
+0000052C  4CDF 0201                 60              MOVEM.L (SP)+,D0/A1             Restore D0
+00000530  4E75                      61              RTS
+00000532                            62              
+00000532  48E7 8000                 63  P_STR       MOVEM.L D0,-(SP)                Preserve D0
+00000536  700D                      64              MOVEQ   #13,D0                  Set up to print string at A1 with CR/LF
+00000538  4E4F                      65              TRAP    #15                     Print the string
+0000053A  4CDF 0001                 66              MOVEM.L (SP)+,D0                Restore D0
+0000053E  4E75                      67              RTS
+00000540                            68  
+00000540  48E7 8040                 69  P_CRLF      MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00000544  700D                      70              MOVEQ.L #13,D0                  Set up print with CRLF
+00000546  43F9 000005A6             71              LEA     NULL,A1                 Set null string
+0000054C  4E4F                      72              TRAP    #15
+0000054E  4CDF 0201                 73              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+00000552  4E75                      74              RTS
+00000554                            75              
+00000554  48E7 8040                 76  GET_WORDS   MOVEM.L D0/A1,-(SP)
+00000558  4EB8 0514                 77  GET_THEWORD JSR     STR_FUNCT
+0000055C  121A                      78              MOVE.B  (A2)+,D1
+0000055E  5210                      79              ADD.B   #1,(A0)
+00000560  B23C 0000                 80              CMP.B   #0,D1
+00000564  66F2                      81              BNE     GET_THEWORD
+00000566                            82              
+00000566  43F9 000005A7             83  OUTPUT      LEA     NUMWORDS,A1
+0000056C  5310                      84              SUB.B   #1,(A0)
+0000056E  1210                      85              MOVE.B  (A0),D1
+00000570  4EB8 0524                 86              JSR     P_NUM
+00000574  4EB8 0540                 87              JSR     P_CRLF
+00000578  4EB9 00000584             88              JSR     P_LIST
+0000057E  4CDF 0201                 89              MOVEM.L (SP)+,D0/A1
+00000582  4E75                      90              RTS
+00000584                            91              
+00000584  48E7 E0C0                 92  P_LIST      MOVEM.L D0-D2/A1-A0,-(SP)
+00000588  7003                      93  PRINT_LOOP  MOVEQ   #3,D0
+0000058A  1218                      94              MOVE.B  (A0)+,D1                
+0000058C  4E4F                      95              TRAP    #15
+0000058E  43F9 000005A6             96              LEA     NULL,A1
+00000594  700E                      97              MOVEQ   #14,D0                  
+00000596  4E4F                      98              TRAP    #15
+00000598  5302                      99              SUB.B   #1,D2
+0000059A  66EC                     100              BNE     PRINT_LOOP
+0000059C  4EB8 0540                101              JSR     P_CRLF
+000005A0  4CDF 0307                102              MOVEM.L (SP)+,D0-D2/A1-A0             Restore D0 and A1
+000005A4  4E75                     103              RTS
+000005A6                           104  
+000005A6                           105  
+000005A6= 00                       106  NULL        DC.B    0                       Empty stringTA          DC.B    0
+000005A7= 41 6D 6F 75 6E 74 ...    107  NUMWORDS    DC.B    'Amount of words entered: ',0
+000005C1                           108  
+000005C1                           109  
+000005C1                           110  
+000005C1                           111  
+000005C1                           112  
+000005C1                           113  
+000005C1                           114  
+000005C1                           115  
+000005C1                           116  
+000005C1                           117  
+000005C1                           118  
+000005C1                           119  
+000005C1                           120  
+000005C1                           121  
+000005C1                           122  
+000005C1                           123  
+000005C1                           124  
+000005C1                           125  
+000005C1                           126  -------------------- end include --------------------
+000005C1                           127              
+000005C1                           128              END     START                   End of program and entry
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+COUNT1              48A
+COUNT2              4B3
+COUNT3              4DC
+GET_THEWORD         558
+GET_WORDS           554
+INIT                470
+NULL                5A6
+NUMWORDS            5A7
+OUTPUT              566
+PRINT_LOOP          588
+P_CRLF              540
+P_LIST              584
+P_NUM               524
+P_PRMPT             506
+P_STR               532
+START               400
+STR_FUNCT           514
+WORDS1              48B
+WORDS2              4B4
+WORDS3              4DD
+WORD_L1             4A9
+WORD_L2             4D2
+WORD_L3             4FB

@@ -1,0 +1,36 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 1/29/2016 4:15:08 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :q1
+00000000                             3  * Written by :Mason Cooper
+00000000                             4  * Date       :28-01-2016
+00000000                             5  * Description:Infinitely rotates a binary(01011001) number through LED's
+00000000                             6  *-----------------------------------------------------------
+00000000  =00E00010                  7  LEDS        EQU     $E00010
+00000000                             8  
+00000000                             9      
+00000400                            10  START       ORG    $400
+00000400  103C 0059                 11              MOVE.B #$59,D0
+00000404                            12              
+00000404  13C0 00E00010             13  LOOP        MOVE.B D0,LEDS
+0000040A  223C 000FFFFF             14              MOVE.L #$FFFFF,D1
+00000410  5381                      15  DELAY       SUBI.L #1,D1
+00000412  66FC                      16              BNE    DELAY
+00000414  E218                      17              ROR.B  #1,D0
+00000416  13C0 00E00010             18              MOVE.B D0,LEDS
+0000041C  66E6                      19              BNE    LOOP
+0000041E                            20      END    START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+DELAY               410
+LEDS                E00010
+LOOP                404
+START               400

@@ -1,0 +1,44 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 1/22/2016 4:54:31 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :Q3
+00000000                             3  * Written by :Mason Cooper
+00000000                             4  * Date       :2016-01-22
+00000000                             5  * Description:Divison by 2^x
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000400                             8  START       ORG     $400
+00000400                             9  
+00000400  41F9 00000426             10              LEA     LACED,A0
+00000406  43F9 0000042E             11              LEA     S1,A1
+0000040C  45F9 00000432             12              LEA     S2,A2
+00000412  12D8                      13              MOVE.B  (A0)+,(A1)+
+00000414  14D8                      14              MOVE.B  (A0)+,(A2)+
+00000416  12D8                      15              MOVE.B  (A0)+,(A1)+
+00000418  14D8                      16              MOVE.B  (A0)+,(A2)+
+0000041A  12D8                      17              MOVE.B  (A0)+,(A1)+
+0000041C  14D8                      18              MOVE.B  (A0)+,(A2)+
+0000041E  12D8                      19              MOVE.B  (A0)+,(A1)+
+00000420  14D8                      20              MOVE.B  (A0)+,(A2)+
+00000422                            21              
+00000422  4E72 1000                 22              STOP    #$1000
+00000426                            23      
+Line 24 WARNING: ASCII constant exceeds 4 characters
+00000426= 45738ADE 00000000         24  LACED       DC.L    'Fe'+'aEsDy',0
+0000042E                            25  S1          DS.L    1
+00000432                            26  S2          DS.L    1
+00000436                            27              END     START
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+LACED               426
+S1                  42E
+S2                  432
+START               400

@@ -1,0 +1,31 @@
+q1.
+- Adress for START is 1000, num1 is 1018, and num2 is 101C.
+- The two ways are the memory tab and by manual searching
+- It is num2-num1 and the result is 33120325.
+
+q2.
+- No assembly errors
+- Yes the assembler is making assumptions
+- You dont need to assign a legnth suffix but if you dont put anyting it will make it a word.
+
+q3.
+- Yes the assembler makes a lengeth assumption, it assume it to be a word.
+- It is different because it is assuming a long word is a word and only stores half of it.
+
+q4.
+- Yes the assembler had errors.
+- Yes the assembler is assuming the data is word length.
+- The assembler is assuming the data is a word but it is given a long word so it cant
+store the amount of data it is given.
+
+q5.
+- SUB is working with 12(C, 1100) and 45(FFD, 101101) and the result is 33(FF1, 100001).
+
+q6.
+- In SUB.B only the bytes were subtracted, in SUB.W the length of a word was subtracted 
+and in SUB.L the length of a long word was subtracted.
+
+q7.
+- This is essentially the same as question 6 but with different values being used. 
+but in this case the numbers used it the length of a word so in subtracing with SUB.W and SUB.L the correct answer
+is given in both.

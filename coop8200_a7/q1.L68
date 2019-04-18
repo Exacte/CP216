@@ -1,0 +1,313 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 3/6/2016 10:55:28 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Bit Maps
+00000000                             3  * Written by : Mason Cooper
+00000000                             4  * Date       : 03-01-2016
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00001000                             7      ORG    $1000
+00001000                             8  START:
+00001000  43F9 0000101C              9              LEA     Disk1,A1
+00001006  4EB9 0000110E             10              JSR     F_C_EMPTY
+0000100C  43F9 0000101C             11              LEA     Disk1,A1
+00001012  4EB9 000011EA             12              JSR     FEC_SET
+00001018                            13  
+00001018                            14  
+00001018  FFFF FFFF                 15      SIMHALT
+0000101C                            16  
+0000101C                            17  * Variables and constants
+0000101C  =0000101C                 18  Bitmap  EQU    *
+0000101C= FFFFFFF0 0FC8FEDF ...     19  Disk1   DC.L   $FFFFFFF0,$0FC8FEDF,$00001111,$22223333
+0000102C= FFFFFFFF FFFF000F ...     20          DC.L   $FFFFFFFF,$FFFF000F,$FF000000,$00000000
+0000103C= FFFFFFFF FFFFFF00 ...     21  Disk2   DC.L   $FFFFFFFF,$FFFFFF00,$00000000,$FFFF8000
+0000104C= 0F021234 00004321 ...     22          DC.L   $0F021234,$00004321,$00001111,$22223333
+0000105C= FF800000 00FFFFFF ...     23  Disk3   DC.L   $FF800000,$00FFFFFF,$FFFFFFFF,$22003333
+0000106C= 00000000 F8007FF0 ...     24          DC.L   $00000000,$F8007FF0,$0000AAAA,$FF004660
+0000107C= FFFFFFFF FFFFFFFF ...     25  Disk4   DC.L   $FFFFFFFF,$FFFFFFFF,$FFFFFFFF,$FFFFFFFF
+0000108C= FFFFFFFF FFFFFFFF ...     26          DC.L   $FFFFFFFF,$FFFFFFFF,$FFFFFFFF,$FFFFFFFF
+0000109C= 00000000 00000000 ...     27  Disk5   DC.L   $00000000,$00000000,$00000000,$00000000
+000010AC= 00000000 00000000 ...     28          DC.L   $00000000,$00000000,$00000000,$00000000
+000010BC                            29  
+000010BC                            30      INCLUDE 'io_util.x68'
+000010BC  48E7 8000                 31  P_PRMPT   MOVEM.L   D0,-(SP)                Preserve D0
+000010C0  7012                      32              MOVEQ.L #18,D0                  Set up prompt and read number into D1.L
+000010C2  4E4F                      33              TRAP    #15
+000010C4  4CDF 0001                 34              MOVEM.L (SP)+,D0                Restore D0
+000010C8  4E75                      35              RTS
+000010CA                            36  
+000010CA  48E7 8040                 37  P_STR_LEN   MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+000010CE  43F9 0000130F             38              LEA     TA,A1                   Move throw away variable pointer to A1
+000010D4  7002                      39              MOVEQ.L #2,D0                   Set up to read string into A1 and length into D1.L
+000010D6  4E4F                      40              TRAP    #15                     
+000010D8  4CDF 0201                 41              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+000010DC  4E75                      42              RTS
+000010DE                            43  
+000010DE  48E7 8000                 44  P_NUM       MOVEM.L D0,-(SP)                Preserve D0
+000010E2  7011                      45              MOVEQ   #17,D0                  Set up to print D1.L without CR/LF
+000010E4  4E4F                      46              TRAP    #15                     Print the number
+000010E6  4CDF 0001                 47              MOVEM.L (SP)+,D0                Restore D0
+000010EA  4E75                      48              RTS
+000010EC                            49              
+000010EC  48E7 8000                 50  P_STR       MOVEM.L D0,-(SP)                Preserve D0
+000010F0  700E                      51              MOVEQ   #14,D0                  Set up to print string at A1 with CR/LF
+000010F2  4E4F                      52              TRAP    #15                     Print the string
+000010F4  4CDF 0001                 53              MOVEM.L (SP)+,D0                Restore D0
+000010F8  4E75                      54              RTS
+000010FA                            55  
+000010FA  48E7 8040                 56  P_CRLF      MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+000010FE  700D                      57              MOVEQ.L #13,D0                  Set up print with CRLF
+00001100  43F9 0000130E             58              LEA     NULL,A1                 Set null string
+00001106  4E4F                      59              TRAP    #15
+00001108  4CDF 0201                 60              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+0000110C  4E75                      61              RTS
+0000110E                            62              
+0000110E                            63  
+0000110E  48E7 E060                 64  F_C_EMPTY   MOVEM.L D0/D1/D2/A1/A2,-(SP)
+00001112  123C 0007                 65              MOVE.B  #7,D1
+00001116  2019                      66  NOT_FULL    MOVE.L  (A1)+,D0
+00001118  0639 0020 00001311        67              ADD.B   #$20,POS
+00001120  B0B9 00001334             68              CMP.L   CLU_FULL,D0
+00001126  6600 0010                 69              BNE     NOT_F
+0000112A  51C9 FFEA                 70              DBRA    D1,NOT_FULL
+0000112E                            71              
+0000112E  B279 00001332             72              CMP.W   DISK_FULL,D1
+00001134  6700 00A4                 73              BEQ     ALT_END
+00001138                            74              
+00001138  E198                      75  NOT_F       ROL.L   #8,D0
+0000113A  5039 00001311             76              ADD.B   #8,POS
+00001140  B03C 00FF                 77              CMP.B   #$FF,D0
+00001144  67F2                      78              BEQ     NOT_F
+00001146  4201                      79              CLR.B   D1
+00001148                            80  
+00001148  B03C 007F                 81              CMP.B   #$7F,D0
+0000114C  6300 006C                 82              BLS     END
+00001150  B03C 00F0                 83              CMP.B   #$F0,D0
+00001154  6400 002E                 84              BCC     R_BYTE
+00001158                            85              
+00001158  1200                      86              MOVE.B  D0,D1
+0000115A  E819                      87              ROR.B   #4,D1
+0000115C                            88              
+0000115C  5239 00001311             89              ADD.B   #1,POS
+00001162  B23C 000C                 90              CMP.B   #$C,D1
+00001166  6500 0052                 91              BCS     END
+0000116A  5239 00001311             92              ADD.B   #1,POS
+00001170  B23C 000E                 93              CMP.B   #$E,D1
+00001174  6500 0044                 94              BCS     END
+00001178  5239 00001311             95              ADD.B   #1,POS
+0000117E  4EF9 000011BA             96              JMP     END
+00001184                            97              
+00001184                            98              
+00001184  5839 00001311             99  R_BYTE      ADD.B   #4,POS
+0000118A  B03C 00F8                100              CMP.B   #$F8,D0
+0000118E  6500 002A                101              BCS     END
+00001192  5239 00001311            102              ADD.B   #1,POS
+00001198  B03C 00FC                103              CMP.B   #$FC,D0
+0000119C  6500 001C                104              BCS     END
+000011A0  5239 00001311            105              ADD.B   #1,POS
+000011A6  B03C 00FE                106              CMP.B   #$FE,D0
+000011AA  6500 000E                107              BCS     END
+000011AE  5239 00001311            108              ADD.B   #1,POS
+000011B4  4EF9 000011BA            109              JMP     END
+000011BA                           110              
+000011BA  43F9 00001350            111  END         LEA     CLU_STR,A1
+000011C0  1239 00001311            112              MOVE.B  POS,D1
+000011C6  4EB8 10EC                113              JSR     P_STR
+000011CA  143C 000A                114              MOVE.B  #10,D2
+000011CE  103C 000F                115              MOVE.B  #15,D0
+000011D2  4E4F                     116              TRAP    #15
+000011D4  4EF9 000011E4            117              JMP     SKIP
+000011DA                           118              
+000011DA  43F9 00001338            119  ALT_END     LEA     C_F_STR,A1
+000011E0  4EB8 10EC                120              JSR     P_STR
+000011E4                           121            
+000011E4  4CDF 0607                122  SKIP        MOVEM.L (SP)+,D0/D1/D2/A1/A2
+000011E8  4E75                     123              RTS
+000011EA                           124              
+000011EA  48E7 E060                125  FEC_SET     MOVEM.L D0/D1/D2/A1/A2,-(SP)
+000011EE  103C 0007                126              MOVE.B  #7,D0
+000011F2  2019                     127  N_F         MOVE.L  (A1)+,D0
+000011F4  B0B9 00001334            128              CMP.L   CLU_FULL,D0
+000011FA  6600 0010                129              BNE     SUB
+000011FE  51C9 FFF2                130              DBRA    D1,N_F
+00001202                           131              
+00001202  B279 00001332            132              CMP.W   DISK_FULL,D1
+00001208  6700 00DE                133              BEQ     _END
+0000120C                           134              
+0000120C  5949                     135  SUB         SUB.W   #4,A1
+0000120E  4280                     136              CLR.L   D0
+00001210  4EF9 00001238            137              JMP     FIRST_Z
+00001216                           138  
+00001216  5200                     139  TZ_ADD      ADD.B   #1,D0
+00001218  D139 00001310            140              ADD.B   D0,TOTAL
+0000121E  0C19 00FF                141              CMP.B   #$FF,(A1)+
+00001222  6700 00A4                142              BEQ     FINISH
+00001226  5349                     143              SUB.W   #1,A1
+00001228  0C11 0080                144              CMP.B   #$80,(A1)
+0000122C  6500 002E                145              BCS     LZ_TEST
+00001230  0C11 0080                146              CMP.B   #$80,(A1)
+00001234  6400 0092                147              BCC     FINISH
+00001238                           148  
+00001238                           149              
+00001238  1211                     150  FIRST_Z     MOVE.B  (A1),D1
+0000123A  0C19 00FF                151              CMP.B   #$FF,(A1)+
+0000123E  67F8                     152              BEQ     FIRST_Z
+00001240                           153              
+00001240  45F9 00001312            154              LEA     T_ZERO,A2
+00001246  103C 0007                155              MOVE.B  #7,D0
+0000124A  141A                     156  TZ_TEST     MOVE.B  (A2)+,D2
+0000124C  B401                     157              CMP.B   D1,D2
+0000124E  67C6                     158              BEQ     TZ_ADD
+00001250  51C8 FFF8                159              DBRA    D0,TZ_TEST
+00001254                           160              
+00001254  B238 007F                161              CMP.B   $7F,D1
+00001258  6300 0020                162              BLS     EMB
+0000125C                           163              
+0000125C  45F9 0000131A            164  LZ_TEST     LEA     L_ZERO,A2
+00001262  1211                     165              MOVE.B  (A1),D1
+00001264  103C 0007                166              MOVE.B  #7,D0
+00001268  5239 00001310            167  LZ_LOOP     ADD.B   #1,TOTAL
+0000126E  141A                     168              MOVE.B  (A2)+,D2
+00001270  B401                     169              CMP.B   D1,D2
+00001272  6300 0054                170              BLS     FINISH
+00001276  51C8 FFF0                171              DBRA    D0,LZ_LOOP
+0000127A                           172              
+0000127A  43F9 00001321            173  EMB         LEA     Z_ARRAY,A1
+00001280  B27C 00BF                174              CMP.W   #$BF,D1
+00001284  6300 0036                175              BLS     CALC
+00001288  5A49                     176              ADD.W   #$5,A1
+0000128A  B27C 00DF                177              CMP.W   #$DF,D1
+0000128E  6300 002C                178              BLS     CALC
+00001292  5849                     179              ADD.W   #$4,A1
+00001294  B27C 00EF                180              CMP.W   #$EF,D1
+00001298  6300 0022                181              BLS     CALC
+0000129C  5649                     182              ADD.W   #$3,A1
+0000129E  B27C 00F7                183              CMP.W   #$F7,D1
+000012A2  6300 0018                184              BLS     CALC
+000012A6  5449                     185              ADD.W   #$2,A1
+000012A8  B27C 00FB                186              CMP.W   #$FB,D1
+000012AC  6300 000E                187              BLS     CALC
+000012B0  5249                     188              ADD.W   #$1,A1
+000012B2  B27C 00FD                189              CMP.W   #$FD,D1
+000012B6  6300 0004                190              BLS     CALC
+000012BA  5249                     191              ADD.W   #$1,A1
+000012BC                           192  
+000012BC  5239 00001310            193  CALC        ADD.B   #1,TOTAL
+000012C2  1419                     194              MOVE.B  (A1)+,D2
+000012C4  B401                     195              CMP.B   D1,D2
+000012C6  62F4                     196              BHI     CALC
+000012C8                           197              
+000012C8                           198  
+000012C8  43F9 00001374            199  FINISH      LEA     ETY_SET_CLU,A1
+000012CE  1239 00001310            200              MOVE.B  TOTAL,D1
+000012D4  4EB8 10EC                201              JSR     P_STR
+000012D8  143C 000A                202              MOVE.B  #10,D2
+000012DC  103C 000F                203              MOVE.B  #15,D0
+000012E0  4E4F                     204              TRAP    #15
+000012E2  4EF9 000012F2            205              JMP     SKIP_HERE
+000012E8                           206              
+000012E8  43F9 00001338            207  _END        LEA     C_F_STR,A1
+000012EE  4EB8 10EC                208              JSR     P_STR
+000012F2                           209                     
+000012F2  4CDF 0203                210  SKIP_HERE   MOVEM.L (SP)+,D0/D1/A1
+000012F6  4E75                     211              RTS
+000012F8                           212  
+000012F8                           213  
+000012F8  48E7 C040                214  TOT_ETY     MOVEM.L D0/D1/A1,-(SP)
+000012FC  123C 0007                215              MOVE.B  #7,D1
+00001300  2019                     216  SMT         MOVE.L  (A1)+,D0
+00001302  E398                     217              ROL.L   #1,D0
+00001304  51C9 FFFA                218              DBRA    D1,SMT
+00001308  4CDF 0603                219              MOVEM.L (SP)+,D0/D1/A1/A2
+0000130C  4E75                     220              RTS
+0000130E                           221  
+0000130E= 00                       222  NULL        DC.B    0                       Empty string
+0000130F= 00                       223  TA          DC.B    0
+00001310= 00                       224  TOTAL       DC.B    0
+00001311= D8                       225  POS         DC.B    $D8
+00001312= 00 80 C0 E0 F0 F8 ...    226  T_ZERO      DC.B    00,$80,$C0,$E0,$F0,$F8,$FC,$FE
+0000131A= 7F 2F 1F 0F 07 02 01     227  L_ZERO      DC.B    $7F,$2F,$1F,$F,7,2,1
+00001321= 90 88 84 82 81           228  Z_ARRAY     DC.B    $90,$88,$84,$82,$81
+00001326= C8 C4 C2 C1 E4 E2        229              DC.B    $C8,$C4,$C2,$C1,$E4,$E2
+0000132C= E1 F2 F1 F9 FD           230              DC.B    $E1,$F2,$F1,$F9,$FD
+00001332= FFFF                     231  DISK_FULL   DC.W    $FFFF
+00001334= FFFFFFFF                 232  CLU_FULL    DC.L    $FFFFFFFF
+00001338= 54686973 20446973 ...    233  C_F_STR     DC.L    'This Disk is Full!',0
+00001350= 46697273 74206176 ...    234  CLU_STR     DC.L    'First avaliable cluster is at: ',0
+00001374= 54686520 66697273 ...    235  ETY_SET_CLU DC.L    'The first set of empty clusters is of lenght: ',0
+000013A8                           236  
+000013A8                           237  
+000013A8                           238  
+000013A8                           239  
+000013A8                           240  
+000013A8                           241  
+000013A8                           242  
+000013A8                           243  
+000013A8                           244  
+000013A8                           245  
+000013A8                           246  
+000013A8                           247  
+000013A8                           248  
+000013A8                           249  
+000013A8                           250  
+000013A8                           251  
+000013A8                           252  
+000013A8                           253  -------------------- end include --------------------
+000013A8                           254  
+000013A8                           255      END    START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ALT_END             11DA
+BITMAP              101C
+CALC                12BC
+CLU_FULL            1334
+CLU_STR             1350
+C_F_STR             1338
+DISK1               101C
+DISK2               103C
+DISK3               105C
+DISK4               107C
+DISK5               109C
+DISK_FULL           1332
+EMB                 127A
+END                 11BA
+ETY_SET_CLU         1374
+FEC_SET             11EA
+FINISH              12C8
+FIRST_Z             1238
+F_C_EMPTY           110E
+LZ_LOOP             1268
+LZ_TEST             125C
+L_ZERO              131A
+NOT_F               1138
+NOT_FULL            1116
+NULL                130E
+N_F                 11F2
+POS                 1311
+P_CRLF              10FA
+P_NUM               10DE
+P_PRMPT             10BC
+P_STR               10EC
+P_STR_LEN           10CA
+R_BYTE              1184
+SKIP                11E4
+SKIP_HERE           12F2
+SMT                 1300
+START               1000
+SUB                 120C
+TA                  130F
+TOTAL               1310
+TOT_ETY             12F8
+TZ_ADD              1216
+TZ_TEST             124A
+T_ZERO              1312
+Z_ARRAY             1321
+_END                12E8

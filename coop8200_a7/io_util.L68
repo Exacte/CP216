@@ -1,0 +1,300 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 3/6/2016 8:36:33 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Program    : io_util
+00000000                             3  * Written by : David Brown
+00000000                             4  * Date       : 2016-01-25
+00000000                             5  * Description: Printing utilities
+00000000                             6  *
+00000000                             7  * Three registers have special functions:
+00000000                             8  * D0 contains the task code telling the simulator the type
+00000000                             9  *           of I/O to perform
+00000000                            10  * D1 contains either the data or the length of the data
+00000000                            11  *           involved in I/O depending on the task
+00000000                            12  * A1 contains the address of strings to be input or output
+00000000                            13  *           or the path of the file to be used in I/O
+00000000                            14  *-----------------------------------------------------------
+00000000                            15  * Prints the prompt at A1 and reads a number into D1.
+00000000  48E7 8000                 16  P_PRMPT   MOVEM.L   D0,-(SP)                Preserve D0
+00000004  7012                      17              MOVEQ.L #18,D0                  Set up prompt and read number into D1.L
+00000006  4E4F                      18              TRAP    #15
+00000008  4CDF 0001                 19              MOVEM.L (SP)+,D0                Restore D0
+0000000C  4E75                      20              RTS
+0000000E                            21  
+0000000E                            22  * Prints the prompt at A1 and reads a string into D1.
+0000000E  48E7 8040                 23  P_STR_LEN   MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00000012  43F9 00000253             24              LEA     TA,A1                   Move throw away variable pointer to A1
+00000018  7002                      25              MOVEQ.L #2,D0                   Set up to read string into A1 and length into D1.L
+0000001A  4E4F                      26              TRAP    #15                     
+0000001C  4CDF 0201                 27              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+00000020  4E75                      28              RTS
+00000022                            29  
+00000022                            30  * Prints the mesage at A1 and the value at D1
+00000022  48E7 8000                 31  P_NUM       MOVEM.L D0,-(SP)                Preserve D0
+00000026  7011                      32              MOVEQ   #17,D0                  Set up to print D1.L without CR/LF
+00000028  4E4F                      33              TRAP    #15                     Print the number
+0000002A  4CDF 0001                 34              MOVEM.L (SP)+,D0                Restore D0
+0000002E  4E75                      35              RTS
+00000030                            36              
+00000030                            37  * Prints a string with CR/LF
+00000030  48E7 8000                 38  P_STR       MOVEM.L D0,-(SP)                Preserve D0
+00000034  700E                      39              MOVEQ   #14,D0                  Set up to print string at A1 with CR/LF
+00000036  4E4F                      40              TRAP    #15                     Print the string
+00000038  4CDF 0001                 41              MOVEM.L (SP)+,D0                Restore D0
+0000003C  4E75                      42              RTS
+0000003E                            43  
+0000003E                            44  * Prints a CR/LF
+0000003E  48E7 8040                 45  P_CRLF      MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00000042  700D                      46              MOVEQ.L #13,D0                  Set up print with CRLF
+00000044  43F9 00000252             47              LEA     NULL,A1                 Set null string
+0000004A  4E4F                      48              TRAP    #15
+0000004C  4CDF 0201                 49              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+00000050  4E75                      50              RTS
+00000052                            51              
+00000052                            52  * Finds First empty cluster on a specified disk
+00000052                            53  
+00000052  48E7 C040                 54  F_C_EMPTY   MOVEM.L D0/D1/A1,-(SP)
+00000056  123C 0007                 55              MOVE.B  #7,D1
+0000005A  2019                      56  NOT_FULL    MOVE.L  (A1)+,D0
+0000005C  0639 0020 00000255        57              ADD.B   #$20,POS
+00000064  B0B9 00000278             58              CMP.L   CLU_FULL,D0
+0000006A  6600 0010                 59              BNE     NOT_F
+0000006E  51C9 FFEA                 60              DBRA    D1,NOT_FULL
+00000072                            61              
+00000072  B279 00000276             62              CMP.W   DISK_FULL,D1
+00000078  6700 00A4                 63              BEQ     ALT_END
+0000007C                            64              
+0000007C  E198                      65  NOT_F       ROL.L   #8,D0
+0000007E  5039 00000255             66              ADD.B   #8,POS
+00000084  B03C 00FF                 67              CMP.B   #$FF,D0
+00000088  67F2                      68              BEQ     NOT_F
+0000008A  4201                      69              CLR.B   D1
+0000008C                            70  
+0000008C  B03C 007F                 71              CMP.B   #$7F,D0
+00000090  6300 006C                 72              BLS     END
+00000094  B03C 00F0                 73              CMP.B   #$F0,D0
+00000098  6400 002E                 74              BCC     R_BYTE
+0000009C                            75              
+0000009C  1200                      76              MOVE.B  D0,D1
+0000009E  E819                      77              ROR.B   #4,D1
+000000A0                            78              
+000000A0  5239 00000255             79              ADD.B   #1,POS
+000000A6  B23C 000C                 80              CMP.B   #$C,D1
+000000AA  6500 0052                 81              BCS     END
+000000AE  5239 00000255             82              ADD.B   #1,POS
+000000B4  B23C 000E                 83              CMP.B   #$E,D1
+000000B8  6500 0044                 84              BCS     END
+000000BC  5239 00000255             85              ADD.B   #1,POS
+000000C2  4EF9 000000FE             86              JMP     END
+000000C8                            87              
+000000C8                            88              
+000000C8  5839 00000255             89  R_BYTE      ADD.B   #4,POS
+000000CE  B03C 00F8                 90              CMP.B   #$F8,D0
+000000D2  6500 002A                 91              BCS     END
+000000D6  5239 00000255             92              ADD.B   #1,POS
+000000DC  B03C 00FC                 93              CMP.B   #$FC,D0
+000000E0  6500 001C                 94              BCS     END
+000000E4  5239 00000255             95              ADD.B   #1,POS
+000000EA  B03C 00FE                 96              CMP.B   #$FE,D0
+000000EE  6500 000E                 97              BCS     END
+000000F2  5239 00000255             98              ADD.B   #1,POS
+000000F8  4EF9 000000FE             99              JMP     END
+000000FE                           100              
+000000FE  43F9 00000294            101  END         LEA     CLU_STR,A1
+00000104  1239 00000255            102              MOVE.B  POS,D1
+0000010A  4EB8 0030                103              JSR     P_STR
+0000010E  143C 000A                104              MOVE.B  #10,D2
+00000112  103C 000F                105              MOVE.B  #15,D0
+00000116  4E4F                     106              TRAP    #15
+00000118  4EF9 00000128            107              JMP     SKIP
+0000011E                           108              
+0000011E  43F9 0000027C            109  ALT_END     LEA     C_F_STR,A1
+00000124  4EB8 0030                110              JSR     P_STR
+00000128                           111            
+00000128  4CDF 0203                112  SKIP        MOVEM.L (SP)+,D0/D1/A1
+0000012C  4E75                     113              RTS
+0000012E                           114              
+0000012E                           115  * Find the length of the first empty cluster set
+0000012E  48E7 C040                116  FEC_SET     MOVEM.L D0/D1/A1,-(SP)
+00000132  103C 0007                117              MOVE.B  #7,D0
+00000136  2019                     118  N_F         MOVE.L  (A1)+,D0
+00000138  B0B9 00000278            119              CMP.L   CLU_FULL,D0
+0000013E  6600 0010                120              BNE     SUB
+00000142  51C9 FFF2                121              DBRA    D1,N_F
+00000146                           122              
+00000146  B279 00000276            123              CMP.W   DISK_FULL,D1
+0000014C  6700 00DE                124              BEQ     _END
+00000150                           125              
+00000150  5949                     126  SUB         SUB.W   #4,A1
+00000152  4280                     127              CLR.L   D0
+00000154  4EF9 0000017C            128              JMP     FIRST_Z
+0000015A                           129  
+0000015A  5200                     130  TZ_ADD      ADD.B   #1,D0
+0000015C  D139 00000254            131              ADD.B   D0,TOTAL
+00000162  0C19 00FF                132              CMP.B   #$FF,(A1)+
+00000166  6700 00A4                133              BEQ     FINISH
+0000016A  5349                     134              SUB.W   #1,A1
+0000016C  0C11 0080                135              CMP.B   #$80,(A1)
+00000170  6500 002E                136              BCS     LZ_TEST
+00000174  0C11 0080                137              CMP.B   #$80,(A1)
+00000178  6400 0092                138              BCC     FINISH
+0000017C                           139  
+0000017C                           140              
+0000017C  1211                     141  FIRST_Z     MOVE.B  (A1),D1
+0000017E  0C19 00FF                142              CMP.B   #$FF,(A1)+
+00000182  67F8                     143              BEQ     FIRST_Z
+00000184                           144              
+00000184  45F9 00000256            145              LEA     T_ZERO,A2
+0000018A  103C 0007                146              MOVE.B  #7,D0
+0000018E  141A                     147  TZ_TEST     MOVE.B  (A2)+,D2
+00000190  B401                     148              CMP.B   D1,D2
+00000192  67C6                     149              BEQ     TZ_ADD
+00000194  51C8 FFF8                150              DBRA    D0,TZ_TEST
+00000198                           151              
+00000198  B238 007F                152              CMP.B   $7F,D1
+0000019C  6300 0020                153              BLS     EMB
+000001A0                           154              
+000001A0  45F9 0000025E            155  LZ_TEST     LEA     L_ZERO,A2
+000001A6  1211                     156              MOVE.B  (A1),D1
+000001A8  103C 0007                157              MOVE.B  #7,D0
+000001AC  5239 00000254            158  LZ_LOOP     ADD.B   #1,TOTAL
+000001B2  141A                     159              MOVE.B  (A2)+,D2
+000001B4  B401                     160              CMP.B   D1,D2
+000001B6  6300 0054                161              BLS     FINISH
+000001BA  51C8 FFF0                162              DBRA    D0,LZ_LOOP
+000001BE                           163              
+000001BE  43F9 00000265            164  EMB         LEA     Z_ARRAY,A1
+000001C4  B27C 00BF                165              CMP.W   #$BF,D1
+000001C8  6300 0036                166              BLS     CALC
+000001CC  5A49                     167              ADD.W   #$5,A1
+000001CE  B27C 00DF                168              CMP.W   #$DF,D1
+000001D2  6300 002C                169              BLS     CALC
+000001D6  5849                     170              ADD.W   #$4,A1
+000001D8  B27C 00EF                171              CMP.W   #$EF,D1
+000001DC  6300 0022                172              BLS     CALC
+000001E0  5649                     173              ADD.W   #$3,A1
+000001E2  B27C 00F7                174              CMP.W   #$F7,D1
+000001E6  6300 0018                175              BLS     CALC
+000001EA  5449                     176              ADD.W   #$2,A1
+000001EC  B27C 00FB                177              CMP.W   #$FB,D1
+000001F0  6300 000E                178              BLS     CALC
+000001F4  5249                     179              ADD.W   #$1,A1
+000001F6  B27C 00FD                180              CMP.W   #$FD,D1
+000001FA  6300 0004                181              BLS     CALC
+000001FE  5249                     182              ADD.W   #$1,A1
+00000200                           183  
+00000200  5239 00000254            184  CALC        ADD.B   #1,TOTAL
+00000206  1419                     185              MOVE.B  (A1)+,D2
+00000208  B401                     186              CMP.B   D1,D2
+0000020A  62F4                     187              BHI     CALC
+0000020C                           188              
+0000020C                           189  
+0000020C  43F9 000002B8            190  FINISH      LEA     ETY_SET_CLU,A1
+00000212  1239 00000254            191              MOVE.B  TOTAL,D1
+00000218  4EB8 0030                192              JSR     P_STR
+0000021C  143C 000A                193              MOVE.B  #10,D2
+00000220  103C 000F                194              MOVE.B  #15,D0
+00000224  4E4F                     195              TRAP    #15
+00000226  4EF9 00000236            196              JMP     SKIP_HERE
+0000022C                           197              
+0000022C  43F9 0000027C            198  _END        LEA     C_F_STR,A1
+00000232  4EB8 0030                199              JSR     P_STR
+00000236                           200                     
+00000236  4CDF 0203                201  SKIP_HERE   MOVEM.L (SP)+,D0/D1/A1
+0000023A  4E75                     202              RTS
+0000023C                           203  
+0000023C                           204  
+0000023C  48E7 C040                205  TOT_ETY     MOVEM.L D0/D1/A1,-(SP)
+00000240  123C 0007                206              MOVE.B  #7,D1
+00000244  2019                     207  SMT         MOVE.L  (A1)+,D0
+00000246  E398                     208              ROL.L   #1,D0
+00000248  51C9 FFFA                209              DBRA    D1,SMT
+0000024C                           210  
+0000024C  4CDF 0203                211              MOVEM.L (SP)+,D0/D1/A1
+00000250  4E75                     212              RTS
+00000252                           213  
+00000252                           214  * Constants and data.
+00000252= 00                       215  NULL        DC.B    0                       Empty string
+00000253= 00                       216  TA          DC.B    0
+00000254= 00                       217  TOTAL       DC.B    0
+00000255= D8                       218  POS         DC.B    $D8
+00000256= 00 80 C0 E0 F0 F8 ...    219  T_ZERO      DC.B    00,$80,$C0,$E0,$F0,$F8,$FC,$FE
+0000025E= 7F 2F 1F 0F 07 02 01     220  L_ZERO      DC.B    $7F,$2F,$1F,$F,7,2,1
+00000265= 90 88 84 82 81           221  Z_ARRAY     DC.B    $90,$88,$84,$82,$81
+0000026A= C8 C4 C2 C1 E4 E2        222              DC.B    $C8,$C4,$C2,$C1,$E4,$E2
+00000270= E1 F2 F1 F9 FD           223              DC.B    $E1,$F2,$F1,$F9,$FD
+00000276= FFFF                     224  DISK_FULL   DC.W    $FFFF
+00000278= FFFFFFFF                 225  CLU_FULL    DC.L    $FFFFFFFF
+0000027C= 54686973 20446973 ...    226  C_F_STR     DC.L    'This Disk is Full!',0
+00000294= 46697273 74206176 ...    227  CLU_STR     DC.L    'First avaliable cluster is at: ',0
+000002B8= 54686520 66697273 ...    228  ETY_SET_CLU DC.L    'The first set of empty clusters is of lenght: ',0
+000002EC                           229  
+000002EC                           230  
+000002EC                           231  
+000002EC                           232  *~Font name~Courier New~
+000002EC                           233  *~Font size~10~
+000002EC                           234  *~Tab type~0~
+000002EC                           235  *~Tab size~8~
+000002EC                           236  
+000002EC                           237  
+000002EC                           238  
+000002EC                           239  
+000002EC                           240  
+000002EC                           241  
+000002EC                           242  
+000002EC                           243  
+000002EC                           244  
+000002EC                           245  
+000002EC                           246  
+000002EC                           247  
+000002EC                           248  
+Line 249 WARNING: END directive missing, starting address not set
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ALT_END             11E
+CALC                200
+CLU_FULL            278
+CLU_STR             294
+C_F_STR             27C
+DISK_FULL           276
+EMB                 1BE
+END                 FE
+ETY_SET_CLU         2B8
+FEC_SET             12E
+FINISH              20C
+FIRST_Z             17C
+F_C_EMPTY           52
+LZ_LOOP             1AC
+LZ_TEST             1A0
+L_ZERO              25E
+NOT_F               7C
+NOT_FULL            5A
+NULL                252
+N_F                 136
+POS                 255
+P_CRLF              3E
+P_NUM               22
+P_PRMPT             0
+P_STR               30
+P_STR_LEN           E
+R_BYTE              C8
+SKIP                128
+SKIP_HERE           236
+SMT                 244
+SUB                 150
+TA                  253
+TOTAL               254
+TOT_ETY             23C
+TZ_ADD              15A
+TZ_TEST             18E
+T_ZERO              256
+Z_ARRAY             265
+_END                22C

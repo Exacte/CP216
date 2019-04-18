@@ -1,0 +1,34 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 1/29/2016 5:20:46 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :q3
+00000000                             3  * Written by :Mason Cooper
+00000000                             4  * Date       :28-01-2016
+00000000                             5  * Description:Infinitely takes input from push buttons and displays it on the LED's
+00000000                             6  *-----------------------------------------------------------
+00000000  =00E00010                  7  LEDS        EQU     $E00010
+00000000  =00E00014                  8  PB          EQU     $E00014
+00000000                             9      
+00000400                            10  START       ORG     $400
+00000400  103C 0000                 11              MOVE.B  #$00,D0
+00000404                            12              
+00000404  1239 00E00014             13  LOOP        MOVE.B  PB,D1
+0000040A  4601                      14              NOT.B   D1
+0000040C  1001                      15              MOVE.B  D1,D0
+0000040E  13C0 00E00010             16              MOVE.B  D0,LEDS
+00000414  64EE                      17              BCC     LOOP
+00000416                            18      END     START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+LEDS                E00010
+LOOP                404
+PB                  E00014
+START               400

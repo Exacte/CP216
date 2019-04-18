@@ -1,0 +1,257 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 3/6/2016 11:14:23 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Drawing Lines
+00000000                             3  * Written by : Mason Cooper
+00000000                             4  * ID #       : 140328200
+00000000                             5  * Date       : 03-06-2016
+00000000                             6  * Description: 
+00000000                             7  *-----------------------------------------------------------
+00001000                             8     ORG    $1000  
+00001000                             9  START:                  
+00001000                            10  
+00001000  7200                      11          MOVE.L  #$00,D1
+00001002  4EB9 0000116E             12          JSR  SB_CLR
+00001008                            13      
+00001008                            14  
+00001008                            15  
+00001008                            16  * Horizontal line
+00001008  7264                      17          MOVE.L   #100,D1
+0000100A  740A                      18          MOVE.L   #10,D2
+0000100C  7664                      19          MOVE.L   #100,D3
+0000100E  7805                      20          MOVE.L   #5,D4
+00001010  2A3C 000000FF             21          MOVE.L   #$FF,D5
+00001016  4EB9 00001092             22          JSR      DRAW_HLINE
+0000101C                            23          
+0000101C                            24  * Vertical line
+0000101C  7264                      25          MOVE.L   #100,D1
+0000101E  740A                      26          MOVE.L   #10,D2
+00001020  7664                      27          MOVE.L   #100,D3
+00001022  7805                      28          MOVE.L   #5,D4
+00001024  2A3C 0000FF00             29          MOVE.L   #$FF00,D5
+0000102A  4EB9 000010C8             30          JSR      DRAW_VLINE
+00001030                            31          
+00001030                            32  * Diagonal l-r line
+00001030  7264                      33          MOVE.L   #100,D1
+00001032  740A                      34          MOVE.L   #10,D2
+00001034  7664                      35          MOVE.L   #100,D3
+00001036  7805                      36          MOVE.L   #5,D4
+00001038  2A3C 00FF0000             37          MOVE.L   #$FF0000,D5
+0000103E  4EB9 000010FE             38          JSR      DRAW_DLR_LINE
+00001044                            39          
+00001044                            40  
+00001044                            41  * Diangonal r-l line
+00001044  223C 000000D2             42          MOVE.L   #210,D1
+0000104A  740A                      43          MOVE.L   #10,D2
+0000104C  7664                      44          MOVE.L   #100,D3
+0000104E  7805                      45          MOVE.L   #5,D4
+00001050  2A3C 00FF00FF             46          MOVE.L   #$FF00FF,D5
+00001056  4EB9 00001136             47          JSR      DRAW_DRL_LINE
+0000105C                            48          
+0000105C                            49          
+0000105C                            50  * draw horizontal line
+0000105C  7264                      51          MOVE.L   #100,D1
+0000105E  746E                      52          MOVE.L   #110,D2
+00001060  7669                      53          MOVE.L   #105,D3
+00001062  7805                      54          MOVE.L   #5,D4
+00001064  2A3C 00FFFF00             55          MOVE.L   #$FFFF00,D5
+0000106A  4EB9 00001092             56          JSR      DRAW_HLINE
+00001070                            57          
+00001070                            58  * draw vertical line
+00001070                            59  
+00001070  223C 000000C8             60          MOVE.L   #200,D1
+00001076  740A                      61          MOVE.L   #10,D2
+00001078  7664                      62          MOVE.L   #100,D3
+0000107A  7805                      63          MOVE.L   #5,D4
+0000107C  2A3C 0000FFFF             64          MOVE.L   #$00FFFF,D5
+00001082  4EB9 000010C8             65          JSR      DRAW_VLINE
+00001088                            66         
+00001088                            67  * display
+00001088  4EB9 0000118A             68          JSR  SB_DSP
+0000108E                            69  
+0000108E                            70  EXIT
+0000108E                            71  
+0000108E                            72  
+0000108E  FFFF FFFF                 73      SIMHALT             ; halt simulator
+00001092                            74  
+00001092                            75  DRAW_HLINE
+00001092                            76      
+00001092  48E7 8080                 77          MOVEM.L     D0/A0,-(SP)
+00001096  41F9 000011CE             78          LEA.L    SB,A0
+0000109C  E589                      79          LSL.L    #2,D1
+0000109E  D1C1                      80          ADDA.L   D1,A0
+000010A0  C4FC 0280                 81          MULU     #SB_W,D2
+000010A4  E58A                      82          LSL.L    #2,D2
+000010A6  D1C2                      83          ADDA.L   D2,A0
+000010A8  243C 00000280             84          MOVE.L   #SB_W,D2
+000010AE  E58A                      85          LSL.L    #2,D2
+000010B0                            86          
+000010B0  2003                      87  HWLOOP  MOVE.L   D3,D0
+000010B2  2248                      88          MOVE.L   A0,A1
+000010B4  20C5                      89  HHLOOP  MOVE.L   D5,(A0)+
+000010B6  51C8 FFFC                 90          DBRA     D0,HHLOOP
+000010BA  2049                      91          MOVE.L   A1,A0    
+000010BC  D1C2                      92          ADDA.L   D2,A0
+000010BE  51CC FFF0                 93          DBRA     D4,HWLOOP
+000010C2  4CDF 0101                 94          MOVEM.L     (SP)+,D0/A0
+000010C6  4E75                      95          RTS
+000010C8                            96     
+000010C8  48E7 8080                 97  DRAW_VLINE  MOVEM.L D0/A0,-(SP)
+000010CC  41F9 000011CE             98          LEA.L    SB,A0
+000010D2  E589                      99          LSL.L    #2,D1
+000010D4  D1C1                     100          ADDA.L   D1,A0
+000010D6  C4FC 0280                101          MULU     #SB_W,D2
+000010DA  E58A                     102          LSL.L    #2,D2
+000010DC  D1C2                     103          ADDA.L   D2,A0
+000010DE  243C 00000280            104          MOVE.L   #SB_W,D2
+000010E4  E58A                     105          LSL.L    #2,D2
+000010E6                           106          
+000010E6  2004                     107  VHLOOP  MOVE.L   D4,D0
+000010E8  2248                     108          MOVE.L   A0,A1
+000010EA  20C5                     109  VWLOOP  MOVE.L   D5,(A0)+
+000010EC  51C8 FFFC                110          DBRA     D0,VWLOOP
+000010F0  2049                     111          MOVE.L   A1,A0    
+000010F2  D1C2                     112          ADDA.L   D2,A0
+000010F4  51CB FFF0                113          DBRA     D3,VHLOOP
+000010F8  4CDF 0101                114          MOVEM.L     (SP)+,D0/A0
+000010FC  4E75                     115          RTS
+000010FE                           116  
+000010FE  48E7 8080                117  DRAW_DLR_LINE   MOVEM.L D0/A0,-(SP)
+00001102  41F9 000011CE            118          LEA.L    SB,A0
+00001108  E589                     119          LSL.L    #2,D1
+0000110A  D1C1                     120          ADDA.L   D1,A0
+0000110C  C4FC 0280                121          MULU     #SB_W,D2
+00001110  E58A                     122          LSL.L    #2,D2
+00001112  D1C2                     123          ADDA.L   D2,A0
+00001114  243C 00000280            124          MOVE.L   #SB_W,D2
+0000111A  E58A                     125          LSL.L    #2,D2
+0000111C                           126          
+0000111C  2004                     127  LRHLOOP  MOVE.L   D4,D0
+0000111E  2248                     128           MOVE.L   A0,A1
+00001120  20C5                     129  LRWLOOP  MOVE.L   D5,(A0)+
+00001122  51C8 FFFC                130          DBRA     D0,LRWLOOP
+00001126  2049                     131          MOVE.L   A1,A0      
+00001128  D1C2                     132          ADDA.L   D2,A0
+0000112A  5888                     133          ADDA.L   #4,A0
+0000112C                           134      
+0000112C  51CB FFEE                135          DBRA     D3,LRHLOOP
+00001130  4CDF 0101                136          MOVEM.L     (SP)+,D0/A0
+00001134  4E75                     137          RTS
+00001136                           138      
+00001136  48E7 8080                139  DRAW_DRL_LINE   MOVEM.L D0/A0,-(SP)
+0000113A  41F9 000011CE            140          LEA.L    SB,A0
+00001140  E589                     141          LSL.L    #2,D1
+00001142  D1C1                     142          ADDA.L   D1,A0
+00001144  C4FC 0280                143          MULU     #SB_W,D2
+00001148  E58A                     144          LSL.L    #2,D2
+0000114A  D1C2                     145          ADDA.L   D2,A0
+0000114C  243C 00000280            146          MOVE.L   #SB_W,D2
+00001152  E58A                     147          LSL.L    #2,D2
+00001154                           148  
+00001154  2004                     149  RLHLOOP  MOVE.L   D4,D0
+00001156  2248                     150          MOVE.L   A0,A1
+00001158  2105                     151  RLWLOOP  MOVE.L   D5,-(A0)
+0000115A  51C8 FFFC                152          DBRA     D0,RLWLOOP
+0000115E  2049                     153          MOVEA.L  A1,A0   
+00001160  D1C2                     154          ADDA.L   D2,A0
+00001162  5988                     155          SUBA.L   #4,A0
+00001164                           156      
+00001164  51CB FFEE                157          DBRA     D3,RLHLOOP
+00001168  4CDF 0101                158          MOVEM.L     (SP)+,D0/A0
+0000116C  4E75                     159          RTS
+0000116E                           160      
+0000116E                           161      
+0000116E                           162       INCLUDE "buffer.X68"
+0000116E                           163  
+0000116E  =00000280                164  SB_W        EQU     640
+0000116E  =00000280                165  SB_H        EQU     640
+0000116E                           166  
+0000116E  =00064000                167  SB_S        EQU     SB_W*SB_H               * Screen buffer size in pixels (long words).
+0000116E                           168  
+0000116E  48E7 0180                169  SB_CLR      MOVEM.L D7/A0,-(SP)
+00001172                           170  
+00001172  41F9 000011CE            171              LEA     SB,A0
+00001178  2E3C 00064000            172              MOVE.L  #SB_S,D7
+0000117E                           173  
+0000117E  20C1                     174  SB_CLR_LP   MOVE.L  D1,(A0)+                * Set the pixel color.
+00001180  5387                     175              SUBQ.L  #1,D7
+00001182  6EFA                     176              BGT     SB_CLR_LP
+00001184                           177              
+00001184  4CDF 0180                178              MOVEM.L (SP)+,D7/A0
+00001188  4E75                     179              RTS
+0000118A                           180  
+0000118A  48E7 F080                181  SB_DSP      MOVEM.L D0-D3/A0,-(SP)
+0000118E                           182  
+0000118E  7021                     183              MOVEQ.L #33,D0
+00001190  223C 02800000            184              MOVE.L  #SB_W*$10000,D1         * Set the screen width (upper word)
+00001196  0641 0280                185              ADD.W   #SB_H,D1                * Set the screen height (lower word)
+0000119A  4E4F                     186              TRAP    #15
+0000119C                           187  
+0000119C  41F9 000011CE            188              LEA     SB,A0                   * Go to the screen buffer
+000011A2  4282                     189              CLR.L   D2                      * Initialize x
+000011A4  4283                     190              CLR.L   D3                      * Initialize y
+000011A6                           191  
+000011A6  7050                     192  SB_DSP_LP   MOVEQ.L #80,D0                  * Set color task number.
+000011A8  2218                     193              MOVE.L  (A0)+,D1                * Copy pixel color value to D1.
+000011AA  4E4F                     194              TRAP    #15                     * Set the pen color.
+000011AC                           195              
+000011AC  7052                     196              MOVEQ.L #82,D0                  * Set draw pixel task number.
+000011AE  2203                     197              MOVE.L  D3,D1                   * Set x (y is already set)
+000011B0  4E4F                     198              TRAP    #15                     * Draw the pixel
+000011B2                           199              
+000011B2  5283                     200              ADDQ.L  #1,D3                   * Increment x
+000011B4  B6BC 00000280            201              CMP.L   #SB_W,D3                * Are the columns finished?
+000011BA  66EA                     202              BNE     SB_DSP_LP               * No - display the next pixel
+000011BC  4283                     203              CLR.L   D3                      * Yes - set x to 0
+000011BE  5282                     204              ADDQ.L  #1,D2                   * Increment y
+000011C0  B4BC 00000280            205              CMP.L   #SB_H,D2                * Are the rows finished?
+000011C6  66DE                     206              BNE     SB_DSP_LP               * No - continue drawing
+000011C8                           207              
+000011C8  4CDF 010F                208              MOVEM.L (SP)+,D0-D3/A0
+000011CC  4E75                     209              RTS
+000011CE                           210  
+000011CE                           211  SB          DS.L    SB_S                    * Screen buffer storage.
+001911CE  =001911CE                212  SB_E        EQU     *                       * Screen buffer end address.
+001911CE                           213  
+001911CE                           214  
+001911CE                           215  
+001911CE                           216  
+001911CE                           217  
+001911CE                           218  -------------------- end include --------------------
+001911CE                           219  
+001911CE                           220   
+001911CE                           221  
+001911CE                           222        END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+DRAW_DLR_LINE       10FE
+DRAW_DRL_LINE       1136
+DRAW_HLINE          1092
+DRAW_VLINE          10C8
+EXIT                108E
+HHLOOP              10B4
+HWLOOP              10B0
+LRHLOOP             111C
+LRWLOOP             1120
+RLHLOOP             1154
+RLWLOOP             1158
+SB                  11CE
+SB_CLR              116E
+SB_CLR_LP           117E
+SB_DSP              118A
+SB_DSP_LP           11A6
+SB_E                1911CE
+SB_H                280
+SB_S                64000
+SB_W                280
+START               1000
+VHLOOP              10E6
+VWLOOP              10EA

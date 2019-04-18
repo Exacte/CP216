@@ -1,0 +1,92 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 2/5/2016 2:12:47 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Program Number: Q1
+00000000                             3  * Written by    : Mason Cooper
+00000000                             4  * Date Created  : 2016-02-05
+00000000                             5  * Description   : Take user inputed string and returns the length.
+00000000                             6  *-----------------------------------------------------------
+00000400                             7  START       ORG     $400                    Start of program area
+00000400                             8  
+00000400                             9              
+00000400  43F9 0000041E             10  LOOP        LEA     MSG,A1
+00000406  4EB9 0000046E             11              JSR     P_STR
+Line 12 ERROR: Undefined symbol
+0000040C  4EB9 004DBB8E             12              JSR     P_GETC
+00000412  B279 0000041E             13              CMP     ECOND,D1
+00000418  67E6                      14              BEQ     LOOP
+0000041A                            15  
+0000041A  FFFF FFFF                 16              SIMHALT Stop execution 
+0000041E                            17  
+Line 18 ERROR: Invalid syntax
+0000041E=                           18  ECOND       DC.B    #$23
+0000041E= 456E7465 72206120 ...     19  MSG         DC.L    'Enter a single character: ',0
+0000043E                            20  
+0000043E                            21  *-----------------------------------------------------------
+0000043E                            22  
+0000043E                            23              INCLUDE 'io_util.x68'
+0000043E  48E7 8000                 24  P_PRMPT   MOVEM.L   D0,-(SP)                Preserve D0
+00000442  7012                      25              MOVEQ.L #18,D0                  Set up prompt and read number into D1.L
+00000444  4E4F                      26              TRAP    #15
+00000446  4CDF 0001                 27              MOVEM.L (SP)+,D0                Restore D0
+0000044A  4E75                      28              RTS
+0000044C                            29  
+0000044C  48E7 8040                 30  P_STR_LEN   MOVEM.L D0/A1,-(SP)
+00000450  43F9 00000491             31              LEA     TA,A1
+00000456  7002                      32              MOVEQ.L #2,D0
+00000458  4E4F                      33              TRAP    #15
+0000045A  4CDF 0201                 34              MOVEM.L (SP)+,D0/A1
+0000045E  4E75                      35              RTS
+00000460                            36  
+00000460  48E7 8000                 37  P_NUM       MOVEM.L D0,-(SP)                Preserve D0
+00000464  7011                      38              MOVEQ   #17,D0                  Set up to print D1.L without CR/LF
+00000466  4E4F                      39              TRAP    #15                     Print the number
+00000468  4CDF 0001                 40              MOVEM.L (SP)+,D0                Restore D0
+0000046C  4E75                      41              RTS
+0000046E                            42              
+0000046E  48E7 8000                 43  P_STR       MOVEM.L D0,-(SP)                Preserve D0
+00000472  700D                      44              MOVEQ   #13,D0                  Set up to print string at A1 with CR/LF
+00000474  4E4F                      45              TRAP    #15                     Print the string
+00000476  4CDF 0001                 46              MOVEM.L (SP)+,D0                Restore D0
+0000047A  4E75                      47              RTS
+0000047C                            48  
+0000047C  48E7 8040                 49  P_CRLF      MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00000480  700D                      50              MOVEQ.L #13,D0                  Set up print with CRLF
+00000482  43F9 00000490             51              LEA     NULL,A1                 Set null string
+00000488  4E4F                      52              TRAP    #15
+0000048A  4CDF 0201                 53              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+0000048E  4E75                      54              RTS
+00000490                            55  
+00000490= 00                        56  NULL        DC.B    0                       Empty string
+00000491= 00                        57  TA          DC.B    0
+00000492                            58  
+00000492                            59  
+00000492                            60  
+00000492                            61  
+00000492                            62  
+00000492                            63  
+00000492                            64  
+00000492                            65  -------------------- end include --------------------
+00000492                            66  
+00000492                            67              END     START                   End of program and entry
+
+2 errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ECOND               41E
+LOOP                400
+MSG                 41E
+NULL                490
+P_CRLF              47C
+P_NUM               460
+P_PRMPT             43E
+P_STR               46E
+P_STR_LEN           44C
+START               400
+TA                  491

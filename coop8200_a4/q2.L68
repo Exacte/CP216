@@ -1,0 +1,142 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 2/6/2016 6:56:59 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Program Number: Q1
+00000000                             3  * Written by    : Mason Cooper
+00000000                             4  * Date Created  : 2016-02-05
+00000000                             5  * Description   : Take user inputed string and returns the length.
+00000000                             6  *-----------------------------------------------------------
+00000400                             7  START       ORG     $400                    Start of program area
+00000400                             8                   
+00000400  43F9 00000426              9  LOOP        LEA     MSG,A1
+00000406  4EB9 00000476             10              JSR     P_STR
+0000040C  4EB9 00000498             11              JSR     P_GETC
+00000412  4EB9 000004A6             12              JSR     P_DEFINEC        
+00000418  B279 00000424             13              CMP     ECOND,D1
+0000041E  66E0                      14              BNE     LOOP
+00000420                            15  
+00000420  FFFF FFFF                 16              SIMHALT Stop execution 
+00000424                            17  
+00000424= 0023                      18  ECOND       DC.W    $23
+00000426= 456E7465 72206120 ...     19  MSG         DC.L    'Enter a single character: ',0
+00000446                            20  
+00000446                            21  *-----------------------------------------------------------
+00000446                            22  
+00000446                            23              INCLUDE 'io_util.x68'
+00000446  48E7 8000                 24  P_PRMPT   MOVEM.L   D0,-(SP)                Preserve D0
+0000044A  7012                      25              MOVEQ.L #18,D0                  Set up prompt and read number into D1.L
+0000044C  4E4F                      26              TRAP    #15
+0000044E  4CDF 0001                 27              MOVEM.L (SP)+,D0                Restore D0
+00000452  4E75                      28              RTS
+00000454                            29  
+00000454  48E7 8040                 30  P_STR_LEN   MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00000458  43F9 000004FF             31              LEA     TA,A1                   Move throw away variable pointer to A1
+0000045E  7002                      32              MOVEQ.L #2,D0                   Set up to read string into A1 and length into D1.L
+00000460  4E4F                      33              TRAP    #15                     
+00000462  4CDF 0201                 34              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+00000466  4E75                      35              RTS
+00000468                            36  
+00000468  48E7 8000                 37  P_NUM       MOVEM.L D0,-(SP)                Preserve D0
+0000046C  7011                      38              MOVEQ   #17,D0                  Set up to print D1.L without CR/LF
+0000046E  4E4F                      39              TRAP    #15                     Print the number
+00000470  4CDF 0001                 40              MOVEM.L (SP)+,D0                Restore D0
+00000474  4E75                      41              RTS
+00000476                            42              
+00000476  48E7 8000                 43  P_STR       MOVEM.L D0,-(SP)                Preserve D0
+0000047A  700D                      44              MOVEQ   #13,D0                  Set up to print string at A1 with CR/LF
+0000047C  4E4F                      45              TRAP    #15                     Print the string
+0000047E  4CDF 0001                 46              MOVEM.L (SP)+,D0                Restore D0
+00000482  4E75                      47              RTS
+00000484                            48  
+00000484  48E7 8040                 49  P_CRLF      MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00000488  700D                      50              MOVEQ.L #13,D0                  Set up print with CRLF
+0000048A  43F9 000004FE             51              LEA     NULL,A1                 Set null string
+00000490  4E4F                      52              TRAP    #15
+00000492  4CDF 0201                 53              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+00000496  4E75                      54              RTS
+00000498                            55              
+00000498  48E7 8000                 56  P_GETC      MOVEM.L D0,-(SP)                Preserve D0
+0000049C  7005                      57              MOVEQ   #5,D0                   Read a single ASCII char. into A1
+0000049E  4E4F                      58              TRAP    #15                     
+000004A0  4CDF 0001                 59              MOVEM.L (SP)+,D0                Restore D0
+000004A4  4E75                      60              RTS
+000004A6                            61  
+000004A6  48E7 8040                 62  P_DEFINEC   MOVEM.L D0/A1,-(SP)
+000004AA  227C 00000500             63              MOVEA.L #C_ARRAY,A1
+000004B0  1439 000004FE             64              MOVE.B  NULL,D2
+000004B6  5202                      65  COMP        ADD.B   #$01,D2
+000004B8  B219                      66              CMP.B   (A1)+,D1
+000004BA  6EFA                      67              BGT     COMP
+000004BC                            68              
+000004BC  43F9 00000508             69              LEA     OTH,A1
+000004C2  053C 0055                 70              BTST.B  D2,#$55
+000004C6  6700 002C                 71              BEQ     PRINT
+000004CA                            72              
+000004CA  43F9 00000540             73              LEA     UPP,A1
+000004D0  053C 0004                 74              BTST.B  D2,#4
+000004D4  6700 001E                 75              BEQ     PRINT
+000004D8                            76              
+000004D8  43F9 00000564             77              LEA     LOW,A1
+000004DE  053C 0006                 78              BTST.B  D2,#6
+000004E2  6700 0010                 79              BEQ     PRINT
+000004E6                            80  
+000004E6  43F9 00000528             81              LEA     NUM,A1
+000004EC  053C 0002                 82              BTST.B  D2,#2
+000004F0  6700 0002                 83              BEQ     PRINT            
+000004F4                            84  
+000004F4  700D                      85  PRINT       MOVEQ   #13,D0
+000004F6  4E4F                      86              TRAP    #15
+000004F8                            87  
+000004F8  4CDF 0201                 88              MOVEM.L (SP)+,D0/A1
+000004FC  4E75                      89              RTS
+000004FE                            90              
+000004FE                            91  
+000004FE= 00                        92  NULL        DC.B    0                       Empty string
+000004FF= 00                        93  TA          DC.B    0
+00000500= 2F 39 40 5A 60 7A 7F      94  C_ARRAY     DC.B    $2F,$39,$40,$5A,$60,$7A,$7F
+00000508= 20546869 73206973 ...     95  OTH         DC.L    ' This is not a # or a char!',0
+00000528= 20546869 73206973 ...     96  NUM         DC.L    ' This is a number!',0
+00000540= 20546869 73206973 ...     97  UPP         DC.L    ' This is a upper case letter!',0
+00000564= 20546869 73206973 ...     98  LOW         DC.L    ' This is  a lower case letter!',0
+00000588                            99  
+00000588                           100  
+00000588                           101  
+00000588                           102  
+00000588                           103  
+00000588                           104  
+00000588                           105  
+00000588                           106  
+00000588                           107  
+00000588                           108  -------------------- end include --------------------
+00000588                           109  
+00000588                           110              END     START                   End of program and entry
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+COMP                4B6
+C_ARRAY             500
+ECOND               424
+LOOP                400
+LOW                 564
+MSG                 426
+NULL                4FE
+NUM                 528
+OTH                 508
+PRINT               4F4
+P_CRLF              484
+P_DEFINEC           4A6
+P_GETC              498
+P_NUM               468
+P_PRMPT             446
+P_STR               476
+P_STR_LEN           454
+START               400
+TA                  4FF
+UPP                 540

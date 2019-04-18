@@ -1,0 +1,136 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 2/6/2016 6:56:24 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Program    : io_util
+00000000                             3  * Written by : David Brown
+00000000                             4  * Date       : 2016-01-25
+00000000                             5  * Description: Printing utilities
+00000000                             6  *
+00000000                             7  * Three registers have special functions:
+00000000                             8  * D0 contains the task code telling the simulator the type
+00000000                             9  *           of I/O to perform
+00000000                            10  * D1 contains either the data or the length of the data
+00000000                            11  *           involved in I/O depending on the task
+00000000                            12  * A1 contains the address of strings to be input or output
+00000000                            13  *           or the path of the file to be used in I/O
+00000000                            14  *-----------------------------------------------------------
+00000000                            15  * Prints the prompt at A1 and reads a number into D1.
+00000000  48E7 8000                 16  P_PRMPT   MOVEM.L   D0,-(SP)                Preserve D0
+00000004  7012                      17              MOVEQ.L #18,D0                  Set up prompt and read number into D1.L
+00000006  4E4F                      18              TRAP    #15
+00000008  4CDF 0001                 19              MOVEM.L (SP)+,D0                Restore D0
+0000000C  4E75                      20              RTS
+0000000E                            21  
+0000000E                            22  * Prints the prompt at A1 and reads a string into D1.
+0000000E  48E7 8040                 23  P_STR_LEN   MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00000012  43F9 000000B9             24              LEA     TA,A1                   Move throw away variable pointer to A1
+00000018  7002                      25              MOVEQ.L #2,D0                   Set up to read string into A1 and length into D1.L
+0000001A  4E4F                      26              TRAP    #15                     
+0000001C  4CDF 0201                 27              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+00000020  4E75                      28              RTS
+00000022                            29  
+00000022                            30  * Prints the mesage at A1 and the value at D1
+00000022  48E7 8000                 31  P_NUM       MOVEM.L D0,-(SP)                Preserve D0
+00000026  7011                      32              MOVEQ   #17,D0                  Set up to print D1.L without CR/LF
+00000028  4E4F                      33              TRAP    #15                     Print the number
+0000002A  4CDF 0001                 34              MOVEM.L (SP)+,D0                Restore D0
+0000002E  4E75                      35              RTS
+00000030                            36              
+00000030                            37  * Prints a string with CR/LF
+00000030  48E7 8000                 38  P_STR       MOVEM.L D0,-(SP)                Preserve D0
+00000034  700D                      39              MOVEQ   #13,D0                  Set up to print string at A1 with CR/LF
+00000036  4E4F                      40              TRAP    #15                     Print the string
+00000038  4CDF 0001                 41              MOVEM.L (SP)+,D0                Restore D0
+0000003C  4E75                      42              RTS
+0000003E                            43  
+0000003E                            44  * Prints a CR/LF
+0000003E  48E7 8040                 45  P_CRLF      MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00000042  700D                      46              MOVEQ.L #13,D0                  Set up print with CRLF
+00000044  43F9 000000B8             47              LEA     NULL,A1                 Set null string
+0000004A  4E4F                      48              TRAP    #15
+0000004C  4CDF 0201                 49              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+00000050  4E75                      50              RTS
+00000052                            51              
+00000052  48E7 8000                 52  P_GETC      MOVEM.L D0,-(SP)                Preserve D0
+00000056  7005                      53              MOVEQ   #5,D0                   Read a single ASCII char. into A1
+00000058  4E4F                      54              TRAP    #15                     
+0000005A  4CDF 0001                 55              MOVEM.L (SP)+,D0                Restore D0
+0000005E  4E75                      56              RTS
+00000060                            57  
+00000060  48E7 8040                 58  P_DEFINEC   MOVEM.L D0/A1,-(SP)
+00000064  227C 000000BA             59              MOVEA.L #C_ARRAY,A1
+0000006A  1439 000000B8             60              MOVE.B  NULL,D2
+00000070  5202                      61  COMP        ADD.B   #$01,D2
+00000072  B219                      62              CMP.B   (A1)+,D1
+00000074  6EFA                      63              BGT     COMP
+00000076                            64              
+00000076  43F9 000000C2             65              LEA     OTH,A1
+0000007C  053C 0055                 66              BTST.B  D2,#$55
+00000080  6700 002C                 67              BEQ     PRINT
+00000084                            68              
+00000084  43F9 000000E2             69              LEA     NUM,A1
+0000008A  053C 0002                 70              BTST.B  D2,#2
+0000008E  6700 001E                 71              BEQ     PRINT
+00000092                            72              
+00000092  43F9 000000FA             73              LEA     UPP,A1
+00000098  053C 0004                 74              BTST.B  D2,#4
+0000009C  6700 0010                 75              BEQ     PRINT
+000000A0                            76              
+000000A0  43F9 0000011E             77              LEA     LOW,A1
+000000A6  053C 0006                 78              BTST.B  D2,#6
+000000AA  6700 0002                 79              BEQ     PRINT            
+000000AE                            80  
+000000AE  700D                      81  PRINT       MOVEQ   #13,D0
+000000B0  4E4F                      82              TRAP    #15
+000000B2                            83  
+000000B2  4CDF 0201                 84              MOVEM.L (SP)+,D0/A1
+000000B6  4E75                      85              RTS
+000000B8                            86              
+000000B8                            87  
+000000B8                            88  * Constants and data.
+000000B8= 00                        89  NULL        DC.B    0                       Empty string
+000000B9= 00                        90  TA          DC.B    0
+000000BA= 2F 39 40 5A 60 7A 7F      91  C_ARRAY     DC.B    $2F,$39,$40,$5A,$60,$7A,$7F
+000000C2= 20546869 73206973 ...     92  OTH         DC.L    ' This is not a # or a char!',0
+000000E2= 20546869 73206973 ...     93  NUM         DC.L    ' This is a number!',0
+000000FA= 20546869 73206973 ...     94  UPP         DC.L    ' This is a upper case letter!',0
+0000011E= 20546869 73206973 ...     95  LOW         DC.L    ' This is  a lower case letter!',0
+00000142                            96  
+00000142                            97  
+00000142                            98  
+00000142                            99  *~Font name~Courier New~
+00000142                           100  *~Font size~10~
+00000142                           101  *~Tab type~0~
+00000142                           102  *~Tab size~8~
+00000142                           103  
+00000142                           104  
+00000142                           105  
+00000142                           106  
+00000142                           107  
+Line 108 WARNING: END directive missing, starting address not set
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+COMP                70
+C_ARRAY             BA
+LOW                 11E
+NULL                B8
+NUM                 E2
+OTH                 C2
+PRINT               AE
+P_CRLF              3E
+P_DEFINEC           60
+P_GETC              52
+P_NUM               22
+P_PRMPT             0
+P_STR               30
+P_STR_LEN           E
+TA                  B9
+UPP                 FA

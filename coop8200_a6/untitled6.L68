@@ -1,0 +1,58 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 2/28/2016 11:18:49 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00001000                             7  START:      ORG     $1000
+00001000                             8  
+00001000  43F9 0000182E              9          LEA     INPUT,A1
+00001006  700E                      10          MOVEQ   #14,D0
+00001008  4E4F                      11          TRAP    #15
+0000100A  7002                      12          MOVEQ   #2,D0
+0000100C  4E4F                      13          TRAP    #15
+0000100E  7033                      14          MOVEQ   #51,D0
+00001010  4E4F                      15          TRAP    #15
+00001012                            16          
+00001012  7035                      17          MOVE.L  #53,D0        Set up read file
+00001014  2239 00002098             18          MOVE.L  FID,D1        Set the file ID
+Line 19 ERROR: Undefined symbol
+0000101A  43F9 004DBB8E             19          LEA     DATA,A1       Get address of data buffer
+00001020  243C 00000800             20          MOVE.L  #B_SIZE,D2    Set data buffer size
+00001026  4E4F                      21          TRAP    #15           Read from the file
+00001028  4A40                      22          TST.W   D0            Test for errors or EOF (non-0)
+0000102A                            23  
+0000102A                            24  
+0000102A                            25          
+0000102A                            26  
+0000102A                            27  
+0000102A                            28  
+0000102A  FFFF FFFF                 29              SIMHALT 
+0000102E  =00000800                 30  B_SIZE  EQU     2048          Size of buffer
+0000102E                            31  DT      DS.B    B_SIZE
+0000182E= 49 6E 70 75 74 20 ...     32  INPUT   DC.B    'Input a source filename: ',0
+00001848                            33  BUFFER  DS.B    2048
+00002048                            34  FNAMEI  DS.B    80            Input file name
+00002098                            35  FID     DS.L    1             Input file ID
+0000209C                            36  
+0000209C                            37  
+0000209C                            38              END     START
+
+1 error detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+BUFFER              1848
+B_SIZE              800
+DT                  102E
+FID                 2098
+FNAMEI              2048
+INPUT               182E
+START               1000

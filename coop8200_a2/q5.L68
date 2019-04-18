@@ -1,0 +1,34 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 1/22/2016 6:12:55 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :Q6
+00000000                             3  * Written by :Mason Cooper
+00000000                             4  * Date       :2016-01-22
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000400                             8  START       ORG     $400
+00000400                             9  
+00000400  41F9 00000416             10              LEA     DATE,A0
+00000406  2039 00000422             11              MOVE.L  HOLD,D0
+0000040C  2008                      12              MOVE.L  A0,D0
+0000040E  E998                      13              ROL.L   #4,D0
+00000410  2040                      14              MOVE.L  D0,A0
+00000412  4E72 1000                 15              STOP    #$1000
+00000416                            16      
+00000416= 32303039 32303134 ...     17  DATE        DC.L    '20092014',0
+00000422                            18  HOLD        DS.L    1
+00000426                            19              END     START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+DATE                416
+HOLD                422
+START               400

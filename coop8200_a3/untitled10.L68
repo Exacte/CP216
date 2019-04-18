@@ -1,0 +1,36 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 1/29/2016 6:13:23 AM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Program    : Stack demo                   
+00000000                             3  * Written by : Nora Znotinas
+00000000                             4  * Date       : Feb 16, 2011
+00000000                             5  * Description: Demo - subroutine call,
+00000000                             6  *           - context save and restore
+00000000                             7  *           - modification of register in S/R
+00000000                             8  *           - return from subroutine 
+00000000                             9  *-----------------------------------------------------------
+00001000                            10              ORG     $1000
+00001000  303C FFFF                 11  START:      move.w  #$FFFF,D0               ; put something into D0
+00001004  4EB9 00001010             12              jsr     dumb                    ; go do something dumb
+0000100A  4E71                      13              nop     ; look at the contents of D0 now
+0000100C  4E72 2700                 14              stop    #$2700
+00001010                            15  
+00001010  48E7 8080                 16  dumb        movem.l D0/A0,-(sp)             ; save registers (A0 just for fun)
+00001014  103C 0004                 17              move.b  #4,D0                   ; trash D0; look at contents of D0
+00001018  4CDF 0101                 18              movem.l (sp)+,D0/A0             ; restore registers
+0000101C                            19              ; look at contents of D0 now
+0000101C  4E75                      20              rts     ; and return
+0000101E                            21  
+0000101E                            22              END     START                   
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+DUMB                1010
+START               1000

@@ -1,0 +1,132 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 2/12/2016 11:03:59 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Program    : io_util
+00000000                             3  * Written by : David Brown
+00000000                             4  * Date       : 2016-01-25
+00000000                             5  * Description: Printing utilities
+00000000                             6  *
+00000000                             7  * Three registers have special functions:
+00000000                             8  * D0 contains the task code telling the simulator the type
+00000000                             9  *           of I/O to perform
+00000000                            10  * D1 contains either the data or the length of the data
+00000000                            11  *           involved in I/O depending on the task
+00000000                            12  * A1 contains the address of strings to be input or output
+00000000                            13  *           or the path of the file to be used in I/O
+00000000                            14  *-----------------------------------------------------------
+00000000                            15  * Prints the prompt at A1 and reads a number into D1.
+00000000  48E7 8000                 16  P_PRMPT     MOVEM.L D0,-(SP)                Preserve D0
+00000004  7012                      17              MOVEQ.L #18,D0                  Set up prompt and read number into D1.L
+00000006  4E4F                      18              TRAP    #15
+00000008  4CDF 0001                 19              MOVEM.L (SP)+,D0                Restore D0
+0000000C  4E75                      20              RTS
+0000000E                            21                          
+0000000E                            22  * Prints the prompt at A1 and reads a string into D1.
+0000000E  48E7 8040                 23  STR_FUNCT   MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00000012  7002                      24              MOVEQ.L #2,D0                   Set up to read string into A1 and length into D1.L
+00000014  4E4F                      25              TRAP    #15
+00000016  2449                      26              MOVE.L  A1,A2                     
+00000018  4CDF 0201                 27              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+0000001C  4E75                      28              RTS
+0000001E                            29  
+0000001E                            30  * Prints the mesage at A1 and the value at D1
+0000001E  48E7 8040                 31  P_NUM       MOVEM.L D0/A1,-(SP)             Preserve D0
+00000022  7011                      32              MOVEQ   #17,D0                  Set up to print D1.L without CR/LF
+00000024  4E4F                      33              TRAP    #15                     Print the number
+00000026  4CDF 0201                 34              MOVEM.L (SP)+,D0/A1             Restore D0
+0000002A  4E75                      35              RTS
+0000002C                            36              
+0000002C                            37  * Prints a string with CR/LF
+0000002C  48E7 8000                 38  P_STR       MOVEM.L D0,-(SP)                Preserve D0
+00000030  700D                      39              MOVEQ   #13,D0                  Set up to print string at A1 with CR/LF
+00000032  4E4F                      40              TRAP    #15                     Print the string
+00000034  4CDF 0001                 41              MOVEM.L (SP)+,D0                Restore D0
+00000038  4E75                      42              RTS
+0000003A                            43  
+0000003A                            44  * Prints a CR/LF
+0000003A  48E7 8040                 45  P_CRLF      MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+0000003E  700D                      46              MOVEQ.L #13,D0                  Set up print with CRLF
+00000040  43F9 00000078             47              LEA     NULL,A1                 Set null string
+00000046  4E4F                      48              TRAP    #15
+00000048  4CDF 0201                 49              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+0000004C  4E75                      50              RTS
+0000004E                            51              
+0000004E  48E7 8040                 52  GET_WORDS   MOVEM.L D0/A1,-(SP)
+00000052  4EB8 000E                 53  GET_THEWORD JSR     STR_FUNCT
+00000056  121A                      54              MOVE.B  (A2)+,D1
+00000058  5210                      55              ADD.B   #1,(A0)
+0000005A  B23C 0000                 56              CMP.B   #0,D1
+0000005E  66F2                      57              BNE     GET_THEWORD
+00000060                            58              
+00000060  43F9 00000162             59  OUTPUT      LEA     NUMWORDS,A1
+00000066  5310                      60              SUB.B   #1,(A0)
+00000068  1210                      61              MOVE.B  (A0),D1
+0000006A  4EB8 001E                 62              JSR     P_NUM
+0000006E  4EB8 003A                 63              JSR     P_CRLF 
+00000072  4CDF 0201                 64              MOVEM.L (SP)+,D0/A1
+00000076  4E75                      65              RTS
+00000078                            66  
+00000078                            67  * Constants and data.
+00000078= 00                        68  NULL        DC.B    0                       Empty string
+00000079= 00                        69  TA          DC.B    0
+0000007A= 2F 39 40 5A 60 7A 7F      70  C_ARRAY     DC.B    $2F,$39,$40,$5A,$60,$7A,$7F
+00000082= 2C000000 00000000         71  COM         DC.L    ',',0
+0000008A= 20546869 73206973 ...     72  OTH         DC.L    ' This is not a # or a char!',0
+000000AA= 20546869 73206973 ...     73  NUM         DC.L    ' This is a number!',0
+000000C2= 20546869 73206973 ...     74  UPP         DC.L    ' This is a upper case letter!',0
+000000E6= 20546869 73206973 ...     75  LOW         DC.L    ' This is  a lower case letter!',0
+0000010A= 486F7720 6D616E79 ...     76  SLM         DC.L    'How many elements would you like to sum? ',0
+0000013A= 54686520 73756D20 ...     77  SLR         DC.L    'The sum is: ',0
+0000014A= 50726F67 72616D6D ...     78  ENDM        DC.L    'Programming Ending.',0
+00000162= 41 6D 6F 75 6E 74 ...     79  NUMWORDS    DC.B    'Amount of words entered: ',0
+0000017C                            80  
+0000017C                            81  
+0000017C                            82  *~Font name~Courier New~
+0000017C                            83  *~Font size~10~
+0000017C                            84  *~Tab type~0~
+0000017C                            85  *~Tab size~8~
+0000017C                            86  
+0000017C                            87  
+0000017C                            88  
+0000017C                            89  
+0000017C                            90  
+0000017C                            91  
+0000017C                            92  
+0000017C                            93  
+0000017C                            94  
+0000017C                            95  
+0000017C                            96  
+0000017C                            97  
+0000017C                            98  
+0000017C                            99  
+Line 100 WARNING: END directive missing, starting address not set
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+COM                 82
+C_ARRAY             7A
+ENDM                14A
+GET_THEWORD         52
+GET_WORDS           4E
+LOW                 E6
+NULL                78
+NUM                 AA
+NUMWORDS            162
+OTH                 8A
+OUTPUT              60
+P_CRLF              3A
+P_NUM               1E
+P_PRMPT             0
+P_STR               2C
+SLM                 10A
+SLR                 13A
+STR_FUNCT           E
+TA                  79
+UPP                 C2

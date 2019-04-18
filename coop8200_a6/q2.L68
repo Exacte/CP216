@@ -1,0 +1,160 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 2/28/2016 11:24:07 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : binary to BCD
+00000000                             3  * Written by : Mason Cooper
+00000000                             4  * Date       : 02-28-2016
+00000000                             5  * Description: converts binary to bcd
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  * additional deliverable: 11000011010100000 to 11110100001000111111
+00000000                             8  
+00001000                             9  START:  ORG     $1000
+00001000  203C 0001E23A             10          MOVE.L  #$0001E23A,D0
+00001006                            11  
+00001006  7400                      12          MOVEQ   #0,D2      
+00001008  7A07                      13          MOVEQ   #7,D5
+0000100A                            14  LOOP
+0000100A  80FC 000A                 15          DIVU    #10,D0
+0000100E  2200                      16          MOVE.L  D0,D1
+00001010  C0BC 0000FFFF             17          AND.L   #$FFFF,D0
+00001016  4241                      18          CLR.W   D1
+00001018  D481                      19          ADD.L   D1,D2
+0000101A  E89A                      20          ROR.L   #4,D2
+0000101C  51CD FFEC                 21          DBRA    D5,LOOP        
+00001020  E19A                      22          ROL.L   #8,D2
+00001022  E19A                      23          ROL.L   #8,D2
+00001024  2202                      24          MOVE.L  D2,D1
+00001026  4EB9 00001082             25          JSR     P_BCD
+0000102C                            26          
+0000102C                            27          
+0000102C  FFFF FFFF                 28              SIMHALT
+00001030                            29          
+00001030                            30          INCLUDE 'io_util.x68'    
+00001030  48E7 8000                 31  P_PRMPT   MOVEM.L   D0,-(SP)                Preserve D0
+00001034  7012                      32              MOVEQ.L #18,D0                  Set up prompt and read number into D1.L
+00001036  4E4F                      33              TRAP    #15
+00001038  4CDF 0001                 34              MOVEM.L (SP)+,D0                Restore D0
+0000103C  4E75                      35              RTS
+0000103E                            36  
+0000103E  48E7 8040                 37  P_STR_LEN   MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00001042  43F9 00001111             38              LEA     TA,A1                   Move throw away variable pointer to A1
+00001048  7002                      39              MOVEQ.L #2,D0                   Set up to read string into A1 and length into D1.L
+0000104A  4E4F                      40              TRAP    #15                     
+0000104C  4CDF 0201                 41              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+00001050  4E75                      42              RTS
+00001052                            43  
+00001052  48E7 8000                 44  P_NUM       MOVEM.L D0,-(SP)                Preserve D0
+00001056  7011                      45              MOVEQ   #17,D0                  Set up to print D1.L without CR/LF
+00001058  4E4F                      46              TRAP    #15                     Print the number
+0000105A  4CDF 0001                 47              MOVEM.L (SP)+,D0                Restore D0
+0000105E  4E75                      48              RTS
+00001060                            49              
+00001060  48E7 8000                 50  P_STR       MOVEM.L D0,-(SP)                Preserve D0
+00001064  700D                      51              MOVEQ   #13,D0                  Set up to print string at A1 with CR/LF
+00001066  4E4F                      52              TRAP    #15                     Print the string
+00001068  4CDF 0001                 53              MOVEM.L (SP)+,D0                Restore D0
+0000106C  4E75                      54              RTS
+0000106E                            55  
+0000106E  48E7 8040                 56  P_CRLF      MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00001072  700D                      57              MOVEQ.L #13,D0                  Set up print with CRLF
+00001074  43F9 00001110             58              LEA     NULL,A1                 Set null string
+0000107A  4E4F                      59              TRAP    #15
+0000107C  4CDF 0201                 60              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+00001080  4E75                      61              RTS
+00001082                            62  
+00001082  48E7 E0C0                 63  P_BCD       MOVEM.L D0/D1/D2/A0/A1,-(SP)
+00001086  23C1 00001118             64              MOVE.L  D1,HOLD
+0000108C  41F9 00001118             65              LEA     HOLD,A0
+00001092  43F9 0000111E             66              LEA     UNPCKD,A1
+00001098  2401                      67              MOVE.L  D1,D2
+0000109A  5239 00001116             68  N_TST_LOOP  ADD.B   #1,LEN
+000010A0  E88A                      69              LSR.L   #4,D2
+000010A2  B4B9 00001112             70              CMP.L   END_CHK,D2
+000010A8  6EF0                      71              BGT     N_TST_LOOP
+000010AA                            72              
+000010AA  B4BC 00000005             73              CMP.L   #5,D2
+000010B0  6D00 0016                 74              BLT     HERE
+000010B4                            75  
+000010B4  41F9 0000111C             76              LEA     HOLD+4,A0
+000010BA  143C 0002                 77              MOVE.B  #2,D2
+000010BE                            78              
+000010BE  4820                      79  NBCD_LOOP   NBCD    -(A0)
+000010C0  51CA FFFC                 80              DBRA    D2,NBCD_LOOP
+000010C4  32FC 00FD                 81              MOVE.W  #$FD,(A1)+
+000010C8                            82              
+000010C8  4282                      83  HERE        CLR.L   D2
+000010CA  143C 0003                 84              MOVE.B  #3,D2
+000010CE                            85  
+000010CE  4281                      86  UNPCK_LOOP  CLR.L   D1
+000010D0  1218                      87              MOVE.B  (A0)+,D1
+000010D2  E949                      88              LSL.W   #4,D1
+000010D4  E809                      89              LSR.B   #4,D1
+000010D6  32C1                      90              MOVE.W  D1,(A1)+
+000010D8  51CA FFF4                 91              DBRA    D2,UNPCK_LOOP
+000010DC                            92              
+000010DC  4281                      93              CLR.L   D1
+000010DE  4282                      94              CLR.L   D2
+000010E0  43F9 0000111E             95              LEA     UNPCKD,A1
+000010E6  5289                      96              ADD.L   #1,A1
+000010E8  5239 00001116             97              ADD.B   #1,LEN
+000010EE  1439 00001116             98              MOVE.B  LEN,D2
+000010F4  1219                      99  ASCII_LOOP  MOVE.B  (A1)+,D1
+000010F6  0601 0030                100              ADD.B   #$30,D1
+000010FA  7006                     101              MOVEQ.L #6,D0
+000010FC  4E4F                     102              TRAP    #15
+000010FE  51CA FFF4                103              DBRA    D2,ASCII_LOOP
+00001102  13FC 0000 00001116       104              MOVE.B  #0,LEN
+0000110A                           105              
+0000110A  4CDF 0307                106              MOVEM.L (SP)+,D0/D1/D2/A0/A1
+0000110E  4E75                     107              RTS          
+00001110                           108  
+00001110                           109  
+00001110= 00                       110  NULL        DC.B    0                       Empty string
+00001111= 00                       111  TA          DC.B    0
+00001112= 00000010                 112  END_CHK     DC.L    $10
+00001116= 00                       113  LEN         DC.B    0
+00001117= 08                       114  POS         DC.B    8
+00001118                           115  HOLD        DS.B    6
+0000111E                           116  UNPCKD      DS.W    4
+00001126                           117  
+00001126                           118  
+00001126                           119  
+00001126                           120  
+00001126                           121  
+00001126                           122  
+00001126                           123  
+00001126                           124  
+00001126                           125  
+00001126                           126  -------------------- end include --------------------
+00001126                           127          
+00001126                           128              END     START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ASCII_LOOP          10F4
+END_CHK             1112
+HERE                10C8
+HOLD                1118
+LEN                 1116
+LOOP                100A
+NBCD_LOOP           10BE
+NULL                1110
+N_TST_LOOP          109A
+POS                 1117
+P_BCD               1082
+P_CRLF              106E
+P_NUM               1052
+P_PRMPT             1030
+P_STR               1060
+P_STR_LEN           103E
+START               1000
+TA                  1111
+UNPCKD              111E
+UNPCK_LOOP          10CE

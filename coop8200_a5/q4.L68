@@ -1,0 +1,229 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 2/12/2016 9:57:41 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00001000                             7      ORG    $1000
+00001000                             8  START:                  ; first instruction of program
+00001000                             9  
+00001000  43F9 00001098             10              LEA     MSG1,A1
+00001006  4EB9 0000115A             11              JSR     P_STR
+0000100C  43F9 0000102A             12              LEA     ARRAY,A1
+00001012                            13          
+00001012  4EB9 0000113C             14  TOP         JSR     STR_FUNCT
+00001018  D3C1                      15              ADD.L   D1,A1
+0000101A  B23C 0000                 16              CMP.B   #0,D1
+0000101E  66F2                      17              BNE     TOP
+00001020                            18          
+00001020  4EB9 000010CE             19              JSR     P_LIST
+00001026                            20  
+00001026  FFFF FFFF                 21      SIMHALT             ; halt simulator
+0000102A                            22  
+0000102A                            23  * Put variables and constants here
+0000102A                            24  ARRAY   DS.B  110
+00001098= 45 6E 74 65 72 20 ...     25  MSG1    DC.B  'Enter a new word: ', 0
+000010AB                            26  
+000010AB                            27              INCLUDE 'io_util.x68'
+000010AC  48E7 8000                 28  P_PRMPT     MOVEM.L D0,-(SP)                Preserve D0
+000010B0  7012                      29              MOVEQ.L #18,D0                  Set up prompt and read number into D1.L
+000010B2  4E4F                      30              TRAP    #15
+000010B4  4CDF 0001                 31              MOVEM.L (SP)+,D0                Restore D0
+000010B8  4E75                      32              RTS
+000010BA                            33              
+000010BA  48E7 E080                 34  P_PRMPTL    MOVEM.L D0-D2/A0,-(SP)
+000010BE  4EB8 10AC                 35  STORE_LOOP  JSR     P_PRMPT
+000010C2  10C1                      36              MOVE.B  D1,(A0)+
+000010C4  5302                      37              SUB.B   #1,D2
+000010C6  66F6                      38              BNE     STORE_LOOP
+000010C8  4CDF 0107                 39              MOVEM.L (SP)+,D0-D2/A0
+000010CC  4E75                      40              RTS
+000010CE                            41              
+000010CE  48E7 E0C0                 42  P_LIST      MOVEM.L D0-D2/A1-A0,-(SP)
+000010D2  7003                      43  PRINT_LOOP  MOVEQ   #3,D0
+000010D4  1218                      44              MOVE.B  (A0)+,D1                
+000010D6  4E4F                      45              TRAP    #15
+000010D8  43F9 00001214             46              LEA     COM,A1
+000010DE  700E                      47              MOVEQ   #14,D0                  
+000010E0  4E4F                      48              TRAP    #15
+000010E2  5302                      49              SUB.B   #1,D2
+000010E4  66EC                      50              BNE     PRINT_LOOP
+000010E6  4EB9 00001168             51              JSR     P_CRLF
+000010EC  4CDF 0307                 52              MOVEM.L (SP)+,D0-D2/A1-A0             Restore D0 and A1
+000010F0  4E75                      53              RTS
+000010F2                            54              
+000010F2  48E7 E0C0                 55  P_LSUM      MOVEM.L D0-D2/A1-A0,-(SP)
+000010F6  143C 0000                 56              MOVE.B  #0,D2
+000010FA  43F9 0000129C             57              LEA     SLM,A1
+00001100  4EB8 10AC                 58              JSR     P_PRMPT
+00001104  1018                      59  SUM_LOOP    MOVE.B  (A0)+,D0
+00001106  D400                      60              ADD.B   D0,D2
+00001108  5301                      61              SUB.B   #1,D1
+0000110A  66F8                      62              BNE     SUM_LOOP
+0000110C  1202                      63              MOVE.B  D2,D1
+0000110E  43F9 000012CC             64              LEA     SLR,A1
+00001114  4EB9 0000114C             65              JSR     P_NUM
+0000111A  4EB9 00001168             66              JSR     P_CRLF
+00001120  4CDF 0307                 67              MOVEM.L (SP)+,D0-D2/A1-A0             Restore D0 and A1
+00001124  4E75                      68              RTS
+00001126                            69              
+00001126  2F09                      70  END_F       MOVE.L A1,-(SP)
+00001128  43F9 000012DC             71              LEA     ENDM,A1
+0000112E  4EB9 0000115A             72              JSR     P_STR
+00001134  103C 0001                 73              MOVE.B  #01,D0
+00001138  225F                      74              MOVE.L (SP)+,A1
+0000113A  4E75                      75              RTS
+0000113C                            76              
+0000113C  48E7 8040                 77  STR_FUNCT   MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+00001140  7002                      78              MOVEQ.L #2,D0                   Set up to read string into A1 and length into D1.L
+00001142  4E4F                      79              TRAP    #15
+00001144  2449                      80              MOVE.L  A1,A2                     
+00001146  4CDF 0201                 81              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+0000114A  4E75                      82              RTS
+0000114C                            83  
+0000114C  48E7 8040                 84  P_NUM       MOVEM.L D0/A1,-(SP)             Preserve D0
+00001150  7011                      85              MOVEQ   #17,D0                  Set up to print D1.L without CR/LF
+00001152  4E4F                      86              TRAP    #15                     Print the number
+00001154  4CDF 0201                 87              MOVEM.L (SP)+,D0/A1             Restore D0
+00001158  4E75                      88              RTS
+0000115A                            89              
+0000115A  48E7 8000                 90  P_STR       MOVEM.L D0,-(SP)                Preserve D0
+0000115E  700D                      91              MOVEQ   #13,D0                  Set up to print string at A1 with CR/LF
+00001160  4E4F                      92              TRAP    #15                     Print the string
+00001162  4CDF 0001                 93              MOVEM.L (SP)+,D0                Restore D0
+00001166  4E75                      94              RTS
+00001168                            95  
+00001168  48E7 8040                 96  P_CRLF      MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+0000116C  700D                      97              MOVEQ.L #13,D0                  Set up print with CRLF
+0000116E  43F9 0000120A             98              LEA     NULL,A1                 Set null string
+00001174  4E4F                      99              TRAP    #15
+00001176  4CDF 0201                100              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+0000117A  4E75                     101              RTS
+0000117C                           102              
+0000117C  48E7 8000                103  P_GETC      MOVEM.L D0,-(SP)                Preserve D0
+00001180  7005                     104              MOVEQ   #5,D0                   Read a single ASCII char. into A1
+00001182  4E4F                     105              TRAP    #15                     
+00001184  4CDF 0001                106              MOVEM.L (SP)+,D0                Restore D0
+00001188  4E75                     107              RTS
+0000118A                           108  
+0000118A  48E7 8040                109  P_DEFINEC   MOVEM.L D0/A1,-(SP)
+0000118E  227C 0000120C            110              MOVEA.L #C_ARRAY,A1
+00001194  1439 0000120A            111              MOVE.B  NULL,D2
+0000119A  5202                     112  COMP        ADD.B   #$01,D2
+0000119C  B219                     113              CMP.B   (A1)+,D1
+0000119E  6EFA                     114              BGT     COMP
+000011A0                           115              
+000011A0  43F9 0000121C            116              LEA     OTH,A1
+000011A6  053C 0055                117              BTST.B  D2,#$55
+000011AA  6700 002C                118              BEQ     PRINT_
+000011AE                           119              
+000011AE  43F9 00001254            120              LEA     UPP,A1
+000011B4  053C 0004                121              BTST.B  D2,#4
+000011B8  6700 001E                122              BEQ     PRINT_
+000011BC                           123              
+000011BC  43F9 00001278            124              LEA     LOW,A1
+000011C2  053C 0006                125              BTST.B  D2,#6
+000011C6  6700 0010                126              BEQ     PRINT_
+000011CA                           127  
+000011CA  43F9 0000123C            128              LEA     NUM,A1
+000011D0  053C 0002                129              BTST.B  D2,#2
+000011D4  6700 0002                130              BEQ     PRINT_            
+000011D8                           131  
+000011D8  700D                     132  PRINT_      MOVEQ   #13,D0
+000011DA  4E4F                     133              TRAP    #15
+000011DC                           134  
+000011DC  4CDF 0201                135              MOVEM.L (SP)+,D0/A1
+000011E0  4E75                     136              RTS   
+000011E2                           137  
+000011E2  48E7 807F                138  GET_WORDS   MOVEM.L D0/A1-A7,-(SP)
+000011E6  4EB8 113C                139              JSR     STR_FUNCT
+000011EA  D3C1                     140              ADD.L   D1,A1
+000011EC  5210                     141              ADD.B   #1,(A0)
+000011EE  B23C 0000                142              CMP.B   #0,D1
+000011F2  66EE                     143              BNE     GET_WORDS
+000011F4                           144              
+000011F4  43F9 000012F4            145  OUTPUT      LEA     NUMWORDS,A1
+000011FA  1210                     146              MOVE.B  (A0),D1
+000011FC  4EB8 114C                147              JSR     P_NUM
+00001200  4EB8 1168                148              JSR     P_CRLF 
+00001204  4CDF FE01                149              MOVEM.L (SP)+,D0/A1-A7
+00001208  4E75                     150              RTS
+0000120A                           151  
+0000120A= 00                       152  NULL        DC.B    0                       Empty string
+0000120B= 00                       153  TA          DC.B    0
+0000120C= 2F 39 40 5A 60 7A 7F     154  C_ARRAY     DC.B    $2F,$39,$40,$5A,$60,$7A,$7F
+00001214= 2C000000 00000000        155  COM         DC.L    ',',0
+0000121C= 20546869 73206973 ...    156  OTH         DC.L    ' This is not a # or a char!',0
+0000123C= 20546869 73206973 ...    157  NUM         DC.L    ' This is a number!',0
+00001254= 20546869 73206973 ...    158  UPP         DC.L    ' This is a upper case letter!',0
+00001278= 20546869 73206973 ...    159  LOW         DC.L    ' This is  a lower case letter!',0
+0000129C= 486F7720 6D616E79 ...    160  SLM         DC.L    'How many elements would you like to sum? ',0
+000012CC= 54686520 73756D20 ...    161  SLR         DC.L    'The sum is: ',0
+000012DC= 50726F67 72616D6D ...    162  ENDM        DC.L    'Programming Ending.',0
+000012F4= 41 6D 6F 75 6E 74 ...    163  NUMWORDS    DC.B    'Amount of words entered: ',0
+0000130E                           164  
+0000130E                           165  
+0000130E                           166  
+0000130E                           167  
+0000130E                           168  
+0000130E                           169  
+0000130E                           170  
+0000130E                           171  
+0000130E                           172  
+0000130E                           173  
+0000130E                           174  
+0000130E                           175  
+0000130E                           176  
+0000130E                           177  
+0000130E                           178  
+0000130E                           179  
+0000130E                           180  
+0000130E                           181  -------------------- end include --------------------
+0000130E                           182  
+0000130E                           183      END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ARRAY               102A
+COM                 1214
+COMP                119A
+C_ARRAY             120C
+ENDM                12DC
+END_F               1126
+GET_WORDS           11E2
+LOW                 1278
+MSG1                1098
+NULL                120A
+NUM                 123C
+NUMWORDS            12F4
+OTH                 121C
+OUTPUT              11F4
+PRINT_              11D8
+PRINT_LOOP          10D2
+P_CRLF              1168
+P_DEFINEC           118A
+P_GETC              117C
+P_LIST              10CE
+P_LSUM              10F2
+P_NUM               114C
+P_PRMPT             10AC
+P_PRMPTL            10BA
+P_STR               115A
+SLM                 129C
+SLR                 12CC
+START               1000
+STORE_LOOP          10BE
+STR_FUNCT           113C
+SUM_LOOP            1104
+TA                  120B
+TOP                 1012
+UPP                 1254

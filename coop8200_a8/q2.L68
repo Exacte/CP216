@@ -1,0 +1,228 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 3/13/2016 9:30:48 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : ROT13 with staks and streams
+00000000                             3  * Written by : Mason Cooper
+00000000                             4  * Date       : 2016-03-13
+00000000                             5  * Description: Encrypts a string using ROT13 given the starting position,
+00000000                             6  * and the length to be encrypted. varibales are passed on the stack and on the stream
+00000000                             7  *-----------------------------------------------------------
+00001000                             8      ORG    $1000
+00001000                             9  START:
+00001000  43F9 000010C2             10  ENCRYPTOR   LEA     STR_P,A1
+00001006  4EB9 00001294             11              JSR     P_STR
+0000100C  4EB9 00001280             12              JSR     STR_FUNC
+00001012= 00001132                  13              DC.L    STR_HOLD
+00001016  0C39 0000 00001132        14              CMP.B   #0,STR_HOLD
+0000101E  6700 0086                 15              BEQ     FIN
+00001022  13C1 0000112E             16              MOVE.B  D1,STR_LEN
+00001028                            17              
+00001028  43F9 000010D6             18              LEA     ENCRYPT_P,A1
+0000102E  4EB9 00001272             19              JSR     P_PRMPT
+00001034  13C1 0000112F             20              MOVE.B  D1,ENC_STR
+0000103A                            21              
+0000103A  43F9 0000110A             22              LEA     ENCRYPT_L,A1
+00001040  4EB9 00001272             23              JSR     P_PRMPT
+00001046  13C1 00001130             24              MOVE.B  D1,ENC_LEN
+0000104C                            25              
+0000104C  4879 0000112E             26              PEA     STR_LEN
+00001052  4879 0000112F             27              PEA     ENC_STR
+00001058  4879 00001130             28              PEA     ENC_LEN
+0000105E  4EB9 000012B6             29              JSR     ERR_DET
+00001064  DFFC 0000000C             30              ADDA.L  #12,SP
+0000106A                            31              
+0000106A  B23C 0000                 32              CMP.B   #0,D1
+0000106E  6700 0010                 33              BEQ     NXT
+00001072  4EB9 00001302             34              JSR     ERR_P
+00001078  4EB9 000012A2             35              JSR     P_CRLF
+0000107E  6080                      36              BRA     ENCRYPTOR
+00001080                            37              
+00001080  4879 0000112F             38  NXT         PEA     ENC_STR
+00001086  4879 00001130             39              PEA     ENC_LEN
+0000108C  4EB9 00001324             40              JSR     CIPHER
+00001092= 00001132                  41              DC.L    STR_HOLD
+00001096                            42              
+00001096  4EB9 00001294             43              JSR     P_STR
+0000109C  4EB9 000012A2             44              JSR     P_CRLF
+000010A2  6000 FF5C                 45              BRA     ENCRYPTOR
+000010A6                            46              
+000010A6  43F9 000010B6             47  FIN         LEA     BYE,A1
+000010AC  4EB9 00001294             48              JSR     P_STR
+000010B2  FFFF FFFF                 49      SIMHALT
+000010B6                            50  
+000010B6                            51  * Put variables and constants here
+000010B6= 476F6F64 62796521 ...     52  BYE         DC.L    'Goodbye!',0
+000010C2= 456E7465 72206120 ...     53  STR_P       DC.L    'Enter a string: ',0
+000010D6= 456E7465 72206120 ...     54  ENCRYPT_P   DC.L    'Enter a strating position for the encryption: ',0
+0000110A= 456E7465 72206C65 ...     55  ENCRYPT_L   DC.L    'Enter length to be encrypted: ',0
+0000112E                            56  STR_LEN     DS.B    1
+0000112F                            57  ENC_STR     DS.B    1
+00001130                            58  ENC_LEN     DS.B    1
+00001132                            59  STR_HOLD    DS.L    80
+00001272                            60  
+00001272                            61  
+00001272                            62      INCLUDE 'q2_util.x68'
+00001272  48E7 8000                 63  P_PRMPT     MOVEM.L D0,-(SP)                Preserve D0
+00001276  7012                      64              MOVEQ.L #18,D0                  Set up prompt and read number into D1.L
+00001278  4E4F                      65              TRAP    #15
+0000127A  4CDF 0001                 66              MOVEM.L (SP)+,D0                Restore D0
+0000127E  4E75                      67              RTS
+00001280                            68  
+00001280  48E7 8000                 69  STR_FUNC    MOVEM.L D0,-(SP)                Preserve D0 and A1
+00001284  226F 0004                 70              MOVEA.L 4(SP),A1
+00001288  2259                      71              MOVEA.L (A1)+,A1
+0000128A  7002                      72              MOVEQ.L #2,D0                   Set up to read string into A1 and length into D1.L
+0000128C  4E4F                      73              TRAP    #15                     
+0000128E  4CDF 0001                 74              MOVEM.L (SP)+,D0                Restore D0 and A1
+00001292  4E75                      75              RTS
+00001294                            76              
+00001294  48E7 8000                 77  P_STR       MOVEM.L D0,-(SP)                Preserve D0
+00001298  700E                      78              MOVEQ   #14,D0                  Set up to print string at A1 with CR/LF
+0000129A  4E4F                      79              TRAP    #15                     Print the string
+0000129C  4CDF 0001                 80              MOVEM.L (SP)+,D0                Restore D0
+000012A0  4E75                      81              RTS
+000012A2                            82  
+000012A2  48E7 8040                 83  P_CRLF      MOVEM.L D0/A1,-(SP)             Preserve D0 and A1
+000012A6  700D                      84              MOVEQ.L #13,D0                  Set up print with CRLF
+000012A8  43F9 000013A4             85              LEA     NULL,A1                 Set null string
+000012AE  4E4F                      86              TRAP    #15
+000012B0  4CDF 0201                 87              MOVEM.L (SP)+,D0/A1             Restore D0 and A1
+000012B4  4E75                      88              RTS
+000012B6                            89              
+000012B6  48E7 A000                 90  ERR_DET     MOVEM.L D0/D2,-(SP)
+000012BA  246F 000C                 91              MOVEA.L 12(SP),A2
+000012BE  226F 0010                 92              MOVEA.L 16(SP),A1
+000012C2  206F 0014                 93              MOVEA.L 20(SP),A0
+000012C6  1412                      94              MOVE.B  (A2),D2
+000012C8  1211                      95              MOVE.B  (A1),D1
+000012CA  1010                      96              MOVE.B  (A0),D0
+000012CC                            97                         
+000012CC  B23C 0001                 98              CMP.B   #1,D1
+000012D0  6500 0018                 99              BCS     ERR 
+000012D4  B001                     100              CMP.B   D1,D0
+000012D6  6500 0012                101              BCS     ERR
+000012DA                           102              
+000012DA  5301                     103              SUB.B   #1,D1
+000012DC  9001                     104              SUB.B   D1,D0
+000012DE  B400                     105              CMP.B   D0,D2
+000012E0  6300 000E                106              BLS     END         
+000012E4  5239 000013A6            107              ADD.B   #1,ERR_CODE
+000012EA                           108              
+000012EA  5239 000013A6            109  ERR         ADD.B   #1,ERR_CODE
+000012F0  1239 000013A6            110  END         MOVE.B  ERR_CODE,D1
+000012F6  4239 000013A6            111              CLR.B   ERR_CODE
+000012FC  4CDF 0005                112              MOVEM.L (SP)+,D0/D2
+00001300  4E75                     113              RTS
+00001302                           114              
+00001302  48E7 8000                115  ERR_P       MOVEM.L D0,-(SP)
+00001306  43F9 000013A8            116              LEA     ERR_MSG_1,A1
+0000130C  B23C 0001                117              CMP.B   #1,D1
+00001310  6700 0008                118              BEQ     P_ERR
+00001314  43F9 000013D4            119              LEA     ERR_MSG_2,A1          
+0000131A  4EB8 1294                120  P_ERR       JSR     P_STR
+0000131E  4CDF 0001                121              MOVEM.L (SP)+,D0
+00001322  4E75                     122              RTS
+00001324                           123              
+00001324  48E7 C000                124  CIPHER      MOVEM.L D0/D1,-(SP)
+00001328  246F 0008                125              MOVEA.L 8(SP),A2
+0000132C  205A                     126              MOVEA.L (A2)+,A0
+0000132E  2F4A 0008                127              MOVE.L  A2,8(SP)
+00001332  246F 000C                128              MOVEA.L 12(SP),A2
+00001336  226F 0010                129              MOVEA.L 16(SP),A1
+0000133A                           130              
+0000133A  1211                     131              MOVE.B  (A1),D1
+0000133C  2248                     132              MOVE.L  A0,A1
+0000133E  5301                     133              SUB.B   #1,D1
+00001340  D0C1                     134              ADD.W   D1,A0
+00001342                           135              
+00001342  1212                     136  ENCRYPT     MOVE.B  (A2),D1
+00001344  0C10 0041                137  LETTER_CHK  CMP.B   #$41,(A0)
+00001348  6500 004E                138              BCS     CONT
+0000134C  0C10 005A                139              CMP.B   #$5A,(A0)
+00001350  6300 0018                140              BLS     ENC_LOOP
+00001354                           141              
+00001354  0C10 007A                142              CMP.B   #$7A,(A0)
+00001358  6200 003E                143              BHI     CONT
+0000135C  0C10 0061                144              CMP.B   #$61,(A0)
+00001360  6400 0008                145              BCC     ENC_LOOP
+00001364  4EF9 00001398            146              JMP     CONT
+0000136A                           147              
+0000136A  103C 000D                148  ENC_LOOP    MOVE.B  #$D,D0
+0000136E  0C10 005A                149  ROT         CMP.B   #$5A,(A0)
+00001372  6700 0010                150              BEQ     UPP_ROT
+00001376  0C10 007A                151              CMP.B   #$7A,(A0)
+0000137A  6700 0012                152              BEQ     LOW_ROT
+0000137E  4EF9 00001392            153              JMP     SKP
+00001384                           154              
+00001384  10BC 0040                155  UPP_ROT     MOVE.B  #$40,(A0)
+00001388  4EF9 00001392            156              JMP     SKP
+0000138E  10BC 0060                157  LOW_ROT     MOVE.B  #$60,(A0)
+00001392                           158              
+00001392  5210                     159  SKP         ADD.B   #1,(A0)
+00001394  5300                     160              SUB.B   #1,D0
+00001396  66D6                     161              BNE     ROT
+00001398                           162              
+00001398  5248                     163  CONT        ADD.W   #1,A0
+0000139A  5301                     164              SUB.B   #1,D1
+0000139C  66A6                     165              BNE     LETTER_CHK
+0000139E                           166              
+0000139E  4CDF 0003                167              MOVEM.L (SP)+,D0/D1
+000013A2  4E75                     168              RTS
+000013A4                           169              
+000013A4= 00                       170  NULL        DC.B    0                       Empty string
+000013A5= 00                       171  TA          DC.B    0
+000013A6= 00                       172  ERR_CODE    DC.B    0
+000013A8= 456E6372 79707469 ...    173  ERR_MSG_1   DC.L    'Encryption starting point out of bounds!',0
+000013D4= 456E6372 79707469 ...    174  ERR_MSG_2   DC.L    'Encryption length exceeds the bounds!',0
+00001400                           175  
+00001400                           176  
+00001400                           177  
+00001400                           178  
+00001400                           179  -------------------- end include --------------------
+00001400                           180  
+00001400                           181      END    START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+BYE                 10B6
+CIPHER              1324
+CONT                1398
+ENCRYPT             1342
+ENCRYPTOR           1000
+ENCRYPT_L           110A
+ENCRYPT_P           10D6
+ENC_LEN             1130
+ENC_LOOP            136A
+ENC_STR             112F
+END                 12F0
+ERR                 12EA
+ERR_CODE            13A6
+ERR_DET             12B6
+ERR_MSG_1           13A8
+ERR_MSG_2           13D4
+ERR_P               1302
+FIN                 10A6
+LETTER_CHK          1344
+LOW_ROT             138E
+NULL                13A4
+NXT                 1080
+P_CRLF              12A2
+P_ERR               131A
+P_PRMPT             1272
+P_STR               1294
+ROT                 136E
+SKP                 1392
+START               1000
+STR_FUNC            1280
+STR_HOLD            1132
+STR_LEN             112E
+STR_P               10C2
+TA                  13A5
+UPP_ROT             1384

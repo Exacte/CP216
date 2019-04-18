@@ -1,0 +1,325 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 3/6/2016 11:26:54 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      : Login
+00000000                             3  * Written by : Mason Cooper
+00000000                             4  * Date       : 03-05-2016
+00000000                             5  * Description: 
+00000000                             6  *-----------------------------------------------------------
+00001000                             7      ORG    $1000
+00001000                             8      
+00001000                             9  START:                  
+00001000  43F9 00001118             10          LEA     P_I,A1    
+00001006  4EB9 0000125E             11          JSR     P_STR         
+0000100C  43F9 0000130D             12          LEA     FNAMEI,A1     
+00001012  4EB9 0000126C             13          JSR     G_STR         
+00001018  4EB9 0000114E             14          JSR     FOPENR        
+0000101E  4A40                      15          TST.W   D0            
+00001020  6600 00F2                 16          BNE     EXIT
+00001024                            17  
+00001024                            18  
+00001024  43F9 00001132             19          LEA     P_O,A1   
+0000102A  4EB9 0000125E             20          JSR     P_STR         
+00001030  43F9 0000135D             21          LEA     FNAMEO,A1     
+00001036  4EB9 0000126C             22          JSR     G_STR         
+0000103C  4EB9 00001166             23          JSR     FOPENW        
+00001042  4A40                      24          TST.W   D0           
+00001044  6600 00CE                 25          BNE     EXIT
+00001048                            26  
+00001048  343C 0044                 27  READ_L  MOVE   #READ_SIZE, D2 
+0000104C  5442                      28          ADDQ   #2,D2
+0000104E  4EB9 0000118C             29          JSR    FREAD          
+00001054  B07C 0001                 30          CMP.W  #1,D0
+00001058  6700 00AE                 31          BEQ    EOF
+0000105C                            32  
+0000105C  323C 004E                 33          MOVE  #WRITE_SIZE,D1
+00001060  303C 0020                 34          MOVE  #32,D0
+00001064  45F9 00002800             35          LEA   DATAO,A2
+0000106A  14C0                      36  CLR_L   MOVE.B D0,(A2)+ 
+0000106C  51C9 FFFC                 37          DBRA  D1,CLR_L
+00001070                            38          
+00001070                            39       
+00001070  45F9 00002800             40          LEA DATAO,A2            
+00001076  43F9 00002000             41          LEA DATAI,A1          
+0000107C  5489                      42          ADDA.L #02,A1         
+0000107E  1019                      43  FN_L    MOVE.B (A1)+,D0
+00001080  0C00 0020                 44          CMPI.B #' ',D0        
+00001084  67F8                      45          BEQ  FN_L
+00001086  5789                      46          SUBA.L #3,A1           
+00001088  B3FC 00002000             47          CMPA.L #DATAI,A1      
+0000108E  6C00 001C                 48          BGE   POS
+00001092  303C 0078                 49          MOVE  #'x',D0         
+00001096  323C 0003                 50          MOVE  #3,D1
+0000109A                            51            
+0000109A  14C0                      52  B_L     MOVE.B D0,(A2)+
+0000109C  5341                      53          SUBQ   #1,D1
+0000109E  5289                      54          ADDA.L #1,A1        
+000010A0  B3FC 00002000             55          CMPA.L #DATAI,A1
+000010A6  6BF2                      56          BMI    B_L
+000010A8  6000 0006                 57          BRA    N_L
+000010AC  323C 0003                 58  POS     MOVE #3,D1
+000010B0                            59  
+000010B0  1019                      60  N_L     MOVE.B (A1)+,D0
+000010B2  4EB9 00001214             61          JSR  TOLOWER
+000010B8  14C0                      62          MOVE.B D0,(A2)+
+000010BA  51C9 FFF4                 63          DBRA D1,N_L
+000010BE                            64          
+000010BE                            65  
+000010BE  43F9 00002000             66          LEA DATAI,A1             
+000010C4  D3FC 00000040             67          ADDA.L #64,A1          
+000010CA  323C 0003                 68          MOVE #3,D1
+000010CE  1019                      69  ID_L    MOVE.B (A1)+,D0
+000010D0  14C0                      70          MOVE.B D0,(A2)+
+000010D2  51C9 FFFA                 71          DBRA D1,ID_L
+000010D6                            72          
+000010D6                            73  
+000010D6  43F9 00002000             74          LEA DATAI,A1          
+000010DC  548A                      75          ADDA.L #2,A2                 
+000010DE  323C 0044                 76          MOVE #READ_SIZE,D1    
+000010E2  5341                      77          SUBQ #1,D1
+000010E4                            78          
+000010E4  1019                      79  WRITE_L MOVE.B (A1)+,D0
+000010E6  14C0                      80          MOVE.B D0,(A2)+
+000010E8  51C9 FFFA                 81          DBRA D1,WRITE_L
+000010EC  303C 000D                 82          MOVE #CR,D0           
+000010F0  14C0                      83          MOVE.B D0,(A2)+
+000010F2  303C 000A                 84          MOVE #LF,D0
+000010F6  14C0                      85          MOVE.B D0,(A2)+
+000010F8  343C 004E                 86          MOVE #WRITE_SIZE,D2    
+000010FC  5442                      87          ADDQ #2,D2
+000010FE  4EB9 000011BE             88          JSR FWRITE 
+00001104  6000 FF42                 89          BRA READ_L
+00001108                            90          
+00001108  4EB9 000011E4             91  EOF     JSR    FCLOSER
+0000110E  4EB9 000011F6             92          JSR    FCLOSEW  
+00001114                            93  
+00001114                            94  EXIT
+00001114                            95  
+00001114                            96  
+00001114  FFFF FFFF                 97      SIMHALT             ; halt simulator
+00001118                            98      
+00001118= 45 6E 74 65 72 20 ...     99  P_I     DC.B    'Enter a input file name: ',0
+00001132= 45 6E 74 65 72 20 ...    100  P_O     DC.B    'Enter a output file name: ',0  
+0000114D                           101  
+0000114E  7033                     102  FOPENR  MOVE.L  #51,D0
+00001150  43F9 0000130D            103          LEA     FNAMEI,A1
+00001156  4E4F                     104          TRAP    #15
+00001158  4A40                     105          TST.W   D0
+0000115A  6600 0022                106          BNE     F_ERR1
+0000115E  23C1 000013AE            107          MOVE.L  D1,FID_I
+00001164  4E75                     108          RTS
+00001166                           109          
+00001166                           110  
+00001166  7034                     111  FOPENW  MOVE.L  #52,D0
+00001168  43F9 0000135D            112          LEA     FNAMEO,A1
+0000116E  4E4F                     113          TRAP    #15
+00001170  4A40                     114          TST.W   D0
+00001172  6600 000A                115          BNE     F_ERR1
+00001176  23C1 000013B2            116          MOVE.L  D1,FID_O
+0000117C  4E75                     117          RTS
+0000117E                           118       
+0000117E  43F9 000012C6            119  F_ERR1  LEA     FMSG1,A1
+00001184  4EB9 0000125E            120          JSR     P_STR
+0000118A  4E75                     121          RTS
+0000118C                           122  
+0000118C  7035                     123  FREAD   MOVE.L  #53,D0
+0000118E  2239 000013AE            124          MOVE.L  FID_I,D1
+00001194  43F9 00002000            125          LEA     DATAI,A1
+0000119A  4E4F                     126          TRAP    #15
+0000119C  4A40                     127          TST.W   D0
+0000119E  6700 000E                128          BEQ     RD_RTN
+000011A2  B03C 0001                129          CMP.B   #1,D0
+000011A6  6600 0006                130          BNE     RD_RTN         
+000011AA  6600 0004                131          BNE     F_ERR2
+000011AE  4E75                     132  RD_RTN  RTS
+000011B0                           133          
+000011B0  43F9 000012D7            134  F_ERR2  LEA     FMSG2,A1
+000011B6  4EB9 0000125E            135          JSR     P_STR
+000011BC  4E75                     136          RTS
+000011BE                           137          
+000011BE                           138  
+000011BE                           139  
+000011BE  7036                     140  FWRITE  MOVE.L  #54,D0
+000011C0  2239 000013B2            141          MOVE.L  FID_O,D1
+000011C6  43F9 00002800            142          LEA     DATAO,A1
+000011CC                           143  
+000011CC  4E4F                     144          TRAP    #15
+000011CE  4A40                     145          TST.W   D0        
+000011D0  6600 0004                146          BNE     F_ERR3 
+000011D4  4E75                     147          RTS
+000011D6                           148          
+000011D6  43F9 000012E8            149  F_ERR3  LEA     FMSG3,A1
+000011DC  4EB9 0000125E            150          JSR     P_STR
+000011E2  4E75                     151          RTS
+000011E4                           152  
+000011E4  7038                     153  FCLOSER MOVE.L  #56,D0
+000011E6  2239 000013AE            154          MOVE.L  FID_I,D1
+000011EC  4E4F                     155          TRAP    #15
+000011EE  4A40                     156          TST.W   D0
+000011F0  6600 0016                157          BNE     F_ERR4
+000011F4  4E75                     158          RTS
+000011F6                           159          
+000011F6  7038                     160  FCLOSEW MOVE.L  #56,D0
+000011F8  2239 000013B2            161          MOVE.L  FID_O,D1
+000011FE  4E4F                     162          TRAP    #15
+00001200  4A40                     163          TST.W   D0
+00001202  6600 0004                164          BNE     F_ERR4
+00001206  4E75                     165          RTS
+00001208                           166  
+00001208  43F9 000012E8            167  F_ERR4  LEA     FMSG3,A1
+0000120E  4EB9 0000125E            168          JSR     P_STR
+00001214                           169  
+00001214  0C00 0061                170  TOLOWER  CMPI.B  #'a',D0
+00001218  6400 0032                171           BHS    LOWER
+0000121C  0C00 0041                172           CMPI.B  #'A',D0
+00001220  6400 0018                173           BHS    UPPER    
+00001224  0C00 005A                174           CMPI.B  #'Z',D0
+00001228  6300 0010                175           BLS    UPPER
+0000122C  0C00 007A                176           CMPI.B  #'z',D0
+00001230  6300 001A                177           BLS    LOWER
+00001234                           178           
+00001234  303C 0078                179  RTNX     MOVE   #'x',D0
+00001238  4E75                     180           RTS
+0000123A                           181           
+0000123A  0C00 0041                182  UPPER    CMPI.B  #'A',D0
+0000123E  65F4                     183           BLO    RTNX 
+00001240  0C00 005A                184           CMPI.B  #'Z',D0
+00001244  62EE                     185           BHI    RTNX
+00001246  0000 0020                186           ORI.B  #$20,D0
+0000124A  4E75                     187           RTS
+0000124C                           188           
+0000124C  B03C 0061                189  LOWER    CMP.B  #'a',D0
+00001250  65E2                     190           BLO    RTNX 
+00001252  B03C 007A                191           CMP.B  #'z',D0
+00001256  62DC                     192           BHI    RTNX
+00001258  4E75                     193           RTS
+0000125A                           194           
+0000125A  5341                     195  CMP_LP  SUBQ   #1,D1
+0000125C  66FC                     196      BNE    CMP_LP
+0000125E                           197  
+0000125E                           198  
+0000125E  48E7 8000                199  P_STR   MOVEM.L D0,-(SP)
+00001262  700D                     200      MOVEQ   #13,D0
+00001264  4E4F                     201      TRAP    #15
+00001266  4CDF 0001                202      MOVEM.L (SP)+,D0
+0000126A  4E75                     203      RTS
+0000126C                           204  
+0000126C  48E7 8000                205  G_STR   MOVEM.L D0,-(SP)
+00001270  7002                     206      MOVEQ   #2,D0   
+00001272  4E4F                     207      TRAP    #15
+00001274  4CDF 0001                208      MOVEM.L (SP)+,D0
+00001278  4E75                     209      RTS   
+0000127A                           210  
+0000127A  48E7 8000                211  P_NUM   MOVEM.L D0,-(SP)
+0000127E  7003                     212      MOVEQ   #3,D0
+00001280  4E4F                     213      TRAP    #15
+00001282  4CDF 0001                214      MOVEM.L (SP)+,D0
+00001286  4E75                     215      RTS  
+00001288                           216  
+00001288  48E7 8000                217  G_NUM   MOVEM.L D0,-(SP)
+0000128C  7004                     218      MOVEQ   #4,D0
+0000128E  4E4F                     219      TRAP    #15
+00001290  4CDF 0001                220      MOVEM.L (SP)+,D0
+00001294  4E75                     221      RTS  
+00001296                           222  
+00001296  48E7 8040                223  P_CRLF  MOVEM.L D0/A1,-(SP)
+0000129A  700D                     224      MOVEQ.L #13,D0
+0000129C  43F9 0000130C            225      LEA NULL,A1
+000012A2  4E4F                     226      TRAP    #15
+000012A4  4CDF 0201                227      MOVEM.L (SP)+,D0/A1
+000012A8  4E75                     228      RTS
+000012AA                           229  
+000012AA  48E7 8000                230  G_CHAR  MOVEM.L D0,-(SP)
+000012AE  7005                     231      MOVEQ   #5,D0
+000012B0  4E4F                     232      TRAP    #15
+000012B2  4CDF 0001                233      MOVEM.L (SP)+,D0
+000012B6  4E75                     234      RTS
+000012B8                           235  
+000012B8  48E7 8000                236  P_CHAR  MOVEM.L D0,-(SP)
+000012BC  7006                     237      MOVEQ   #6,D0
+000012BE  4E4F                     238      TRAP    #15
+000012C0  4CDF 0001                239      MOVEM.L (SP)+,D0
+000012C4  4E75                     240      RTS  
+000012C6                           241  
+000012C6= 43 61 6E 6E 6F 74 ...    242  FMSG1   DC.B    'Cannot open file',0
+000012D7= 43 61 6E 6E 6F 74 ...    243  FMSG2   DC.B    'Cannot read file',0
+000012E8= 43 61 6E 6E 6F 74 ...    244  FMSG3   DC.B    'Cannot write file',0
+000012FA= 43 61 6E 6E 6F 74 ...    245  FMSG4   DC.B    'Cannot close file',0
+0000130C= 00                       246  NULL    DC.B    0
+0000130D                           247  FNAMEI  DS.B    80
+0000135D                           248  FNAMEO  DS.B    80
+000013AE                           249  FID_I   DS.L    1
+000013B2                           250  FID_O   DS.L    1
+000013B6  =00000800                251  B_SIZE      EQU    2048         
+000013B6  =0000000D                252  CR          EQU    13            
+000013B6  =0000000A                253  LF          EQU    10            
+000013B6  =00000044                254  READ_SIZE   EQU    68  
+000013B6  =0000004E                255  WRITE_SIZE  EQU    78  
+000013B6                           256  
+00002000                           257          org     $2000
+00002000                           258  DATAI   DS.B    B_SIZE
+00002800                           259  DATAO   DS.B    B_SIZE
+00003000                           260  
+00003000                           261          END    START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+B_L                 109A
+B_SIZE              800
+CLR_L               106A
+CMP_LP              125A
+CR                  D
+DATAI               2000
+DATAO               2800
+EOF                 1108
+EXIT                1114
+FCLOSER             11E4
+FCLOSEW             11F6
+FID_I               13AE
+FID_O               13B2
+FMSG1               12C6
+FMSG2               12D7
+FMSG3               12E8
+FMSG4               12FA
+FNAMEI              130D
+FNAMEO              135D
+FN_L                107E
+FOPENR              114E
+FOPENW              1166
+FREAD               118C
+FWRITE              11BE
+F_ERR1              117E
+F_ERR2              11B0
+F_ERR3              11D6
+F_ERR4              1208
+G_CHAR              12AA
+G_NUM               1288
+G_STR               126C
+ID_L                10CE
+LF                  A
+LOWER               124C
+NULL                130C
+N_L                 10B0
+POS                 10AC
+P_CHAR              12B8
+P_CRLF              1296
+P_I                 1118
+P_NUM               127A
+P_O                 1132
+P_STR               125E
+RD_RTN              11AE
+READ_L              1048
+READ_SIZE           44
+RTNX                1234
+START               1000
+TOLOWER             1214
+UPPER               123A
+WRITE_L             10E4
+WRITE_SIZE          4E

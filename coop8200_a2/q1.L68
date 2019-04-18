@@ -1,0 +1,32 @@
+00000400 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 1/22/2016 2:25:55 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  
+00000400                             8  START       ORG     $400
+00000400                             9  
+00000400  3039 00000412             10              MOVE.W  num1,D0
+00000406  3239 00000414             11              MOVE.W  num2,D1
+0000040C  D041                      12              ADD.W   D1,D0
+0000040E  4E72 1000                 13              STOP    #$1000
+00000412                            14      
+00000412= 00FF                      15  num1        DC.W    $00FF
+00000414= FF01                      16  num2        DC.W    -255
+00000416                            17              END     START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+NUM1                412
+NUM2                414
+START               400
